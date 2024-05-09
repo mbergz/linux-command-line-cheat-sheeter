@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include <ncurses.h>
 #include "csfind.h"
+#include <unistd.h>
+#include <termios.h>
 
-#define WINDOW_WIDTH 50
-#define MAX_INPUT_LENGTH 20
+
 #define MAX_OPTIONS 3
 #define ANSI_COLOR_GREEN "\x1b[32m"
 #define ANSI_COLOR_RESET "\x1b[0m"
@@ -25,123 +25,61 @@ void printDir()
     printf("printing dir");
 }
 
-void printOptions(int highlight, char *options[])
-{
-    int x, y, i;
 
-    clear();
-    x = 0;
-    y = 0;
+void printOptions(const char *options[], int selectedOption) {
+    printf("\r\033[2K"); // Clear entire line
 
-    for (i = 0; i < MAX_OPTIONS; ++i)
-    {
-        if (highlight == i + 1)
-        {
-            attron(A_REVERSE);
-            mvprintw(y, x, "%s", options[i]);
-            attroff(A_REVERSE);
+    // Print options with current selection highlighted
+    for (int i = 0; i < MAX_OPTIONS; ++i) {
+        if (i == selectedOption) {
+            printf("\x1b[7m*%s\x1b[0m ", options[i]); // Print highlighted option
+        } else {
+            printf("%s ", options[i]); // Print regular option
         }
-        else
-        {
-            mvprintw(y, x, "%s", options[i]);
-        }
-        ++y;
     }
 
-    refresh();
+    fflush(stdout); // Flush output buffer to ensure it's printed immediately
 }
 
 void printFindCheatSheet()
 {
-    char userSelection[MAX_INPUT_LENGTH];
-    char *options[MAX_OPTIONS] = {"all", "file", "dir"};
+    const char *options[MAX_OPTIONS] = {"all", "file", "dir"};
     int selectedOption = 0;
-    int highlight = 1;
-    int choice = 0;
-    int c;
+    char c;
 
-    initscr();
-    clear();
-    noecho();
-    cbreak(); // Line buffering disabled. pass on everything
+    // Set terminal into non-canonical mode
+    struct termios old;
+    struct termios new;
+    tcgetattr(0, &old);
+    new = old;
+    new.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(0, TCSANOW, &new);
 
-    printOptions(highlight, options);
+    printf("find\n");
 
-    while (1)
-    {
-        c = getch();
-        switch (c)
-        {
-        case '\t': // Tab key
-            if (highlight == MAX_OPTIONS)
-                highlight = 1;
-            else
-                ++highlight;
-            break;
-        case KEY_BTAB: // Shift+Tab
-            if (highlight == 1)
-                highlight = MAX_OPTIONS;
-            else
-                --highlight;
-            break;
-        case 10: // Enter key
-            choice = highlight;
-            break;
-        default:
-            refresh();
+    while (1) {
+        printOptions(options, selectedOption);
+
+        // Read a single character
+        if (read(STDIN_FILENO, &c, 1) == -1) {
+            perror("read");
+            //exit(1);
+        }
+
+        // Process user input
+        if (c == '\t') {
+            selectedOption = (selectedOption + 1) % MAX_OPTIONS; // Move to next option
+            printOptions(options, selectedOption);
+        } else if (c == 'a') {
+            printf("The 'a' key was pressed.\n");
+        } else if (c == '\n') {
+            // Exit loop on Enter key
             break;
         }
-        printOptions(highlight, options);
-        if (choice != 0) // User made a choice; break out of loop
-            break;
     }
-    mvprintw(MAX_OPTIONS + 1, 0, "You chose option %d with choice string %s\n", choice, options[choice - 1]);
-    getch();
-    endwin();
-    //return 0;
-    /*
-        for (int i = 0; i < MAX_OPTIONS; i++)
-        {
-            if (i == selectedOption)
-            {
-                printf(ANSI_COLOR_GREEN);
-                printf("*");
-            }
-            printf("%s", options[i]);
-            printf(ANSI_COLOR_RESET);
-            printf(" ");
-        }
-        printf("\r");
 
-        while (1)
-        {
+    // Reset terminal
+    tcsetattr(0, TCSANOW, &old);
+    printf("\nSelected option: %s\n", options[selectedOption]);
 
-            int key = getchar();
-            if (key == '\t') // Tab pressed
-            {
-                selectedOption = (selectedOption + 1) % MAX_OPTIONS;
-                for (int i = 0; i < MAX_OPTIONS; i++)
-                {
-                    if (i == selectedOption)
-                    {
-                        printf(ANSI_COLOR_GREEN);
-                        printf("*");
-                    }
-                    printf("%s", options[i]);
-                    printf(ANSI_COLOR_RESET);
-                    printf(" ");
-                }
-            }
-            else if (key == '\n')
-            {
-                // Enter pressed
-                break;
-            }
-            while (getchar() != '\n')
-                ;
-        }
-        printf("Selected option: %s\n", options[selectedOption]);
-    */
-    // scanf("%s", userSelection);
-    // printf("%s\n", userSelection);
 }
