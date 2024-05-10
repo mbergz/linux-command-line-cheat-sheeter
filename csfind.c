@@ -52,10 +52,12 @@ void printFindCheatSheet()
     struct termios new;
     tcgetattr(0, &old);
     new = old;
+    //c_lflag = local mode
+    // ICANON = canonincal mode
+    // ECHO = echos input to terminal
     new.c_lflag &= ~(ICANON | ECHO);
+    // TCSANOW means apply changes immediately
     tcsetattr(0, TCSANOW, &new);
-
-    printf("find\n");
 
     while (1) {
         printOptions(options, selectedOption);

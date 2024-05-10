@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
     }
     if (argument != NULL)
     {
-        printf("%s\n", argument);
         if (strcmp(argument, "find") == 0)
         {
             printFindCheatSheet();
