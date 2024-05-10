@@ -4,8 +4,11 @@
 #include <termios.h>
 
 #define MAX_OPTIONS 3
-#define ANSI_COLOR_GREEN "\x1b[32m"
-#define ANSI_COLOR_RESET "\x1b[0m"
+
+#define STD_OUT_REVERSE "\x1b[7m"
+#define STD_OUT_RESET "\x1b[0m"
+#define HIDE_CURSOR "\e[?25l"
+#define SHOW_CURSOR "\e[?25h"
 
 void printAll();
 void printFile();
@@ -33,7 +36,7 @@ void printOptions(const char *options[], int selectedOption)
     {
         if (i == selectedOption)
         {
-            printf("\x1b[7m*%s\x1b[0m ", options[i]); // Print highlighted option
+            printf("%s%s%s ", STD_OUT_REVERSE, options[i], STD_OUT_RESET); // Print highlighted option
         }
         else
         {
@@ -71,6 +74,7 @@ void printFindCheatSheet()
     char c;
 
     enableNonCanonicalMode(&old);
+    printf(HIDE_CURSOR);
 
     while (1)
     {
@@ -89,10 +93,6 @@ void printFindCheatSheet()
             selectedOption = (selectedOption + 1) % MAX_OPTIONS; // Move to next option
             printOptions(options, selectedOption);
         }
-        else if (c == 'a')
-        {
-            printf("The 'a' key was pressed.\n");
-        }
         else if (c == '\n')
         {
             // Exit loop on Enter key
@@ -100,6 +100,8 @@ void printFindCheatSheet()
         }
     }
 
+    printf(SHOW_CURSOR);
     resetTerminalMode(&old);
+
     printf("\nSelected option: %s\n", options[selectedOption]);
 }
