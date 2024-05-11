@@ -2,6 +2,7 @@
 #include "csfind.h"
 #include <unistd.h>
 #include <termios.h>
+#include "common.h"
 
 #define MAX_OPTIONS 3
 
@@ -9,6 +10,12 @@
 #define STD_OUT_RESET "\x1b[0m"
 #define HIDE_CURSOR "\e[?25l"
 #define SHOW_CURSOR "\e[?25h"
+#define CLEAR_LINE "\r\033[2K"
+
+static CommandInfo fileCommands[] = {
+    {"find . -name file.txt", "Find single file in current dir + sub dirs"},
+    {"find /home -name *.json", "Looks for all files ending with json in /home dir and sub-dirs"},
+};
 
 void printAll();
 void printFile();
@@ -16,22 +23,25 @@ void printDir();
 
 void printAll()
 {
-    printf("printing all options");
+    printFile();
+    printDir();
 }
 void printFile()
 {
-    printf("printing file");
+    for (int i = 0; i < sizeof(fileCommands) / sizeof(fileCommands[0]); i++)
+    {
+        printf("%-30s %s\n", fileCommands[i].command, fileCommands[i].description);
+    }
 }
 void printDir()
 {
-    printf("printing dir");
+    printf("printing dir\n");
 }
 
 void printOptions(const char *options[], int selectedOption)
 {
-    printf("\r\033[2K"); // Clear entire line
+    printf(CLEAR_LINE);
 
-    // Print options with current selection highlighted
     for (int i = 0; i < MAX_OPTIONS; ++i)
     {
         if (i == selectedOption)
@@ -40,11 +50,11 @@ void printOptions(const char *options[], int selectedOption)
         }
         else
         {
-            printf("%s ", options[i]); // Print regular option
+            printf("%s ", options[i]);
         }
     }
 
-    fflush(stdout); // Flush output buffer to ensure it's printed immediately
+    fflush(stdout);
 }
 
 void enableNonCanonicalMode(struct termios *old)
@@ -84,10 +94,8 @@ void printFindCheatSheet()
         if (read(STDIN_FILENO, &c, 1) == -1)
         {
             perror("read");
-            // exit(1);
         }
 
-        // Process user input
         if (c == '\t')
         {
             selectedOption = (selectedOption + 1) % MAX_OPTIONS; // Move to next option
@@ -101,7 +109,23 @@ void printFindCheatSheet()
     }
 
     printf(SHOW_CURSOR);
+    printf(CLEAR_LINE);
     resetTerminalMode(&old);
 
-    printf("\nSelected option: %s\n", options[selectedOption]);
+    // printf("\nSelected option: %s\n", options[selectedOption]);
+
+    switch (selectedOption)
+    {
+    case 0:
+        printAll();
+        break;
+    case 1:
+        printFile();
+        break;
+    case 3:
+        printDir();
+        break;
+    default:
+        break;
+    }
 }
