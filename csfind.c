@@ -27,7 +27,7 @@ void printCommands(CommandInfo *commands, int size)
 {
     for (int i = 0; i < size; i++)
     {
-        printf("%-40s %s\n", commands[i].command, commands[i].description);
+        printf("%-50s %s\n", commands[i].command, commands[i].description);
     }
 }
 
@@ -35,7 +35,7 @@ void printFile()
 {
     for (int i = 0; i < sizeof(fileCommands) / sizeof(fileCommands[0]); i++)
     {
-        printf("%-40s %s\n", fileCommands[i].command, fileCommands[i].description);
+        printf("%-50s %s\n", fileCommands[i].command, fileCommands[i].description);
     }
 }
 
@@ -91,7 +91,7 @@ void printFindCheatSheet()
 {
     struct termios old;
 
-    const char *options[MAX_OPTIONS] = {"all", "file", "dir"};
+    const char *options[MAX_OPTIONS] = {"*", "file", "dir"};
     int selectedOption = 0;
     char c;
 
