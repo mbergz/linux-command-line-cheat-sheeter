@@ -15,27 +15,39 @@
 static CommandInfo fileCommands[] = {
     {"find . -name file.txt", "Find single file in current dir + sub dirs"},
     {"find /home -name *.json", "Looks for all files ending with json in /home dir and sub-dirs"},
-};
+    {"find . -maxdepth 1 -type f -regex '.*[12].*'", "Find all files in current dir only matching regex containg 1 or 2 in name "},
+    {"find / -size +100M", "Find all files with size larger than 100MB"},
+    {"find / -mmin -60", "Find all files which are modified within last hour"}};
 
-void printAll();
-void printFile();
-void printDir();
+static CommandInfo dirCommands[] = {
+    {"find /home -type d -name Dir1", "Find all dirs named \"Dir1\" in /home"},
+    {"find . -maxdepth 1 -type d", "List all dirs in current folder"}};
+
+void printCommands(CommandInfo *commands, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        printf("%-40s %s\n", commands[i].command, commands[i].description);
+    }
+}
+
+void printFile()
+{
+    for (int i = 0; i < sizeof(fileCommands) / sizeof(fileCommands[0]); i++)
+    {
+        printf("%-40s %s\n", fileCommands[i].command, fileCommands[i].description);
+    }
+}
+
+void printDir()
+{
+    printCommands(dirCommands, sizeof(dirCommands) / sizeof(dirCommands[0]));
+}
 
 void printAll()
 {
     printFile();
     printDir();
-}
-void printFile()
-{
-    for (int i = 0; i < sizeof(fileCommands) / sizeof(fileCommands[0]); i++)
-    {
-        printf("%-30s %s\n", fileCommands[i].command, fileCommands[i].description);
-    }
-}
-void printDir()
-{
-    printf("printing dir\n");
 }
 
 void printOptions(const char *options[], int selectedOption)
@@ -122,7 +134,7 @@ void printFindCheatSheet()
     case 1:
         printFile();
         break;
-    case 3:
+    case 2:
         printDir();
         break;
     default:
