@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
 #include "csfind.h"
 #include <unistd.h>
 #include <termios.h>
@@ -23,6 +25,28 @@ static CommandInfo dirCommands[] = {
     {"find /home -type d -name Dir1", "Find all dirs named \"Dir1\" in /home"},
     {"find . -maxdepth 1 -type d", "List all dirs in current folder"}};
 
+void enableNonCanonicalMode(struct termios *old, bool disableEcho)
+{
+    tcgetattr(0, old);
+    struct termios new;
+    new = *old;
+    // c_lflag = local mode
+    // ICANON = canonincal mode
+    new.c_lflag &= ~ICANON;
+    if (disableEcho)
+    {
+        // ECHO = echos input to terminal
+        new.c_lflag &= ~ECHO;
+    }
+    // TCSANOW means apply changes immediately
+    tcsetattr(0, TCSANOW, &new);
+}
+
+void resetTerminalMode(struct termios *old)
+{
+    tcsetattr(0, TCSANOW, old);
+}
+
 void printCommands(CommandInfo *commands, int size)
 {
     for (int i = 0; i < size; i++)
@@ -31,12 +55,49 @@ void printCommands(CommandInfo *commands, int size)
     }
 }
 
+void editLineAtIndex(int index, char *line)
+{
+    printf("\r");
+    printf("\033[%dC", index); // move cursor to starting pos
+
+    char c;
+    while ((c = getchar()) != '\n')
+    {
+        printf(CLEAR_LINE);
+        for (int j = strlen(line); j >= index; j--)
+        {
+            line[j + 1] = line[j];
+        }
+        line[index++] = c;
+
+        printf("%s", line);
+        printf("\r");
+        printf("\033[%dC", index);
+    }
+}
+
+void testEditString()
+{
+    char original_content[100] = "Now test line";
+    printf("%s", original_content);
+    fflush(stdout);
+
+    struct termios old;
+    enableNonCanonicalMode(&old, false);
+
+    editLineAtIndex(6, original_content);
+    printf("\n%s\n", original_content);
+
+    resetTerminalMode(&old);
+}
+
 void printFile()
 {
     for (int i = 0; i < sizeof(fileCommands) / sizeof(fileCommands[0]); i++)
     {
         printf("%-50s %s\n", fileCommands[i].command, fileCommands[i].description);
     }
+    // testEditString();
 }
 
 void printDir()
@@ -69,24 +130,6 @@ void printOptions(const char *options[], int selectedOption)
     fflush(stdout);
 }
 
-void enableNonCanonicalMode(struct termios *old)
-{
-    tcgetattr(0, old);
-    struct termios new;
-    new = *old;
-    // c_lflag = local mode
-    // ICANON = canonincal mode
-    // ECHO = echos input to terminal
-    new.c_lflag &= ~(ICANON | ECHO);
-    // TCSANOW means apply changes immediately
-    tcsetattr(0, TCSANOW, &new);
-}
-
-void resetTerminalMode(struct termios *old)
-{
-    tcsetattr(0, TCSANOW, old);
-}
-
 void printFindCheatSheet()
 {
     struct termios old;
@@ -95,7 +138,7 @@ void printFindCheatSheet()
     int selectedOption = 0;
     char c;
 
-    enableNonCanonicalMode(&old);
+    enableNonCanonicalMode(&old, true);
     printf(HIDE_CURSOR);
 
     while (1)
