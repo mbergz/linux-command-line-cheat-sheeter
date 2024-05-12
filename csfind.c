@@ -47,12 +47,46 @@ void resetTerminalMode(struct termios *old)
     tcsetattr(0, TCSANOW, old);
 }
 
-void printCommands(CommandInfo *commands, int size)
+void printCommands(CommandInfo *commands, int size, int selectedCommand)
 {
     for (int i = 0; i < size; i++)
     {
-        printf("%-50s %s\n", commands[i].command, commands[i].description);
+        if (i == selectedCommand)
+        {
+            printf("> \e[1m%-50s\e[m %s\n", commands[i].command, commands[i].description);
+        }
+        else
+        {
+            printf("%-50s %s\n", commands[i].command, commands[i].description);
+        }
     }
+}
+
+void printSelectableCommands(CommandInfo *commands, int size)
+{
+    struct termios old;
+    enableNonCanonicalMode(&old, true);
+    int selectedLine = 0;
+    char input;
+    while (1)
+    {
+        printCommands(commands, size, selectedLine);
+        if (read(STDIN_FILENO, &input, 1) == -1)
+        {
+            perror("read");
+        }
+        if (input == '\t')
+        {
+            selectedLine = (selectedLine + 1) % size;
+            printf("\033[%dA", size); // move cursor up x lines
+        }
+        if (input == '\n')
+        {
+            break;
+        }
+    }
+    printf("Selected line: %s\n", commands[selectedLine].command);
+    resetTerminalMode(&old);
 }
 
 void editLineAtIndex(int index, char *line)
@@ -93,16 +127,13 @@ void testEditString()
 
 void printFile()
 {
-    for (int i = 0; i < sizeof(fileCommands) / sizeof(fileCommands[0]); i++)
-    {
-        printf("%-50s %s\n", fileCommands[i].command, fileCommands[i].description);
-    }
+    printSelectableCommands(fileCommands, sizeof(fileCommands) / sizeof(fileCommands[0]));
     // testEditString();
 }
 
 void printDir()
 {
-    printCommands(dirCommands, sizeof(dirCommands) / sizeof(dirCommands[0]));
+    printSelectableCommands(dirCommands, sizeof(dirCommands) / sizeof(dirCommands[0]));
 }
 
 void printAll()
@@ -145,7 +176,6 @@ void printFindCheatSheet()
     {
         printOptions(options, selectedOption);
 
-        // Read a single character
         if (read(STDIN_FILENO, &c, 1) == -1)
         {
             perror("read");
@@ -154,7 +184,7 @@ void printFindCheatSheet()
         if (c == '\t')
         {
             selectedOption = (selectedOption + 1) % MAX_OPTIONS; // Move to next option
-            printOptions(options, selectedOption);
+            // printOptions(options, selectedOption);
         }
         else if (c == '\n')
         {
