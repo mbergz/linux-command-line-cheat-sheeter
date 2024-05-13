@@ -1,9 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "csfind.h"
 #include <unistd.h>
 #include <termios.h>
+#include <signal.h>
+#include "csfind.h"
 #include "common.h"
 
 #define MAX_OPTIONS 3
@@ -25,11 +27,24 @@ static CommandInfo dirCommands[] = {
     {"find /home -type d -name Dir1", "Find all dirs named \"Dir1\" in /home"},
     {"find . -maxdepth 1 -type d", "List all dirs in current folder"}};
 
-void enableNonCanonicalMode(struct termios *old, bool disableEcho)
+static struct termios old;
+
+void resetTerminalMode()
 {
-    tcgetattr(0, old);
+    printf(SHOW_CURSOR);
+    tcsetattr(0, TCSANOW, &old);
+}
+
+void handleSigint(int sig)
+{
+    resetTerminalMode(&old);
+    exit(EXIT_FAILURE);
+}
+
+void enableNonCanonicalMode(bool disableEcho)
+{
     struct termios new;
-    new = *old;
+    tcgetattr(0, &new);
     // c_lflag = local mode
     // ICANON = canonincal mode
     new.c_lflag &= ~ICANON;
@@ -40,11 +55,6 @@ void enableNonCanonicalMode(struct termios *old, bool disableEcho)
     }
     // TCSANOW means apply changes immediately
     tcsetattr(0, TCSANOW, &new);
-}
-
-void resetTerminalMode(struct termios *old)
-{
-    tcsetattr(0, TCSANOW, old);
 }
 
 void printCommands(CommandInfo *commands, int size, int selectedCommand)
@@ -60,33 +70,6 @@ void printCommands(CommandInfo *commands, int size, int selectedCommand)
             printf("%-50s %s\n", commands[i].command, commands[i].description);
         }
     }
-}
-
-void printSelectableCommands(CommandInfo *commands, int size)
-{
-    struct termios old;
-    enableNonCanonicalMode(&old, true);
-    int selectedLine = 0;
-    char input;
-    while (1)
-    {
-        printCommands(commands, size, selectedLine);
-        if (read(STDIN_FILENO, &input, 1) == -1)
-        {
-            perror("read");
-        }
-        if (input == '\t')
-        {
-            selectedLine = (selectedLine + 1) % size;
-            printf("\033[%dA", size); // move cursor up x lines
-        }
-        if (input == '\n')
-        {
-            break;
-        }
-    }
-    printf("Selected line: %s\n", commands[selectedLine].command);
-    resetTerminalMode(&old);
 }
 
 void editLineAtIndex(int index, char *line)
@@ -110,25 +93,58 @@ void editLineAtIndex(int index, char *line)
     }
 }
 
-void testEditString()
+void editCommand(const char *inputLine)
 {
-    char original_content[100] = "Now test line";
-    printf("%s", original_content);
+    char line[100];
+    strcpy(line, inputLine);
+    printf("%s", line);
     fflush(stdout);
 
-    struct termios old;
-    enableNonCanonicalMode(&old, false);
+    enableNonCanonicalMode(false);
 
-    editLineAtIndex(6, original_content);
-    printf("\n%s\n", original_content);
+    // TODO
+    // Change 6 to a var of int arr in CommandInfo, loop through and edit
+    editLineAtIndex(6, line);
+    printf("\n%s\n", line);
 
-    resetTerminalMode(&old);
+    resetTerminalMode();
+}
+
+void printSelectableCommands(CommandInfo *commands, int size)
+{
+    enableNonCanonicalMode(true);
+    int selectedLine = 0;
+    char input;
+    while (1)
+    {
+        printCommands(commands, size, selectedLine);
+        if (read(STDIN_FILENO, &input, 1) == -1)
+        {
+            perror("read");
+        }
+        if (input == '\t')
+        {
+            selectedLine = (selectedLine + 1) % size;
+            printf("\033[%dA", size); // move cursor up x lines
+        }
+        if (input == '\n')
+        {
+            break;
+        }
+    }
+    // Now erase all lines
+    for (int i = 0; i < size; i++)
+    {
+        printf("\033[%dA", 1);
+        printf(CLEAR_LINE);
+    }
+    resetTerminalMode();
+    // editCommand(commands[selectedLine].command);
 }
 
 void printFile()
 {
     printSelectableCommands(fileCommands, sizeof(fileCommands) / sizeof(fileCommands[0]));
-    // testEditString();
 }
 
 void printDir()
@@ -163,13 +179,14 @@ void printOptions(const char *options[], int selectedOption)
 
 void printFindCheatSheet()
 {
-    struct termios old;
-
+    // Store default terminos settings
+    tcgetattr(0, &old);
+    signal(SIGINT, handleSigint);
     const char *options[MAX_OPTIONS] = {"*", "file", "dir"};
     int selectedOption = 0;
     char c;
 
-    enableNonCanonicalMode(&old, true);
+    enableNonCanonicalMode(true);
     printf(HIDE_CURSOR);
 
     while (1)
@@ -183,8 +200,7 @@ void printFindCheatSheet()
 
         if (c == '\t')
         {
-            selectedOption = (selectedOption + 1) % MAX_OPTIONS; // Move to next option
-            // printOptions(options, selectedOption);
+            selectedOption = (selectedOption + 1) % MAX_OPTIONS;
         }
         else if (c == '\n')
         {
@@ -195,9 +211,7 @@ void printFindCheatSheet()
 
     printf(SHOW_CURSOR);
     printf(CLEAR_LINE);
-    resetTerminalMode(&old);
-
-    // printf("\nSelected option: %s\n", options[selectedOption]);
+    resetTerminalMode();
 
     switch (selectedOption)
     {
