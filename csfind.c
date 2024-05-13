@@ -17,15 +17,15 @@
 #define CLEAR_LINE "\r\033[2K"
 
 static CommandInfo fileCommands[] = {
-    {"find . -name file.txt", "Find single file in current dir + sub dirs"},
-    {"find /home -name *.json", "Looks for all files ending with json in /home dir and sub-dirs"},
-    {"find . -maxdepth 1 -type f -regex '.*[12].*'", "Find all files in current dir only matching regex containg 1 or 2 in name "},
-    {"find / -size +100M", "Find all files with size larger than 100MB"},
-    {"find / -mmin -60", "Find all files which are modified within last hour"}};
+    {"find . -name file.txt", "Find single file in current dir + sub dirs", {6, 16}},
+    {"find /home -name *.json", "Looks for all files ending with json in /home dir and sub-dirs", {}},
+    {"find . -maxdepth 1 -type f -regex '.*[12].*'", "Find all files in current dir only matching regex containg 1 or 2 in name ", {}},
+    {"find / -size +100M", "Find all files with size larger than 100MB", {}},
+    {"find / -mmin -60", "Find all files which are modified within last hour", {}}};
 
 static CommandInfo dirCommands[] = {
-    {"find /home -type d -name Dir1", "Find all dirs named \"Dir1\" in /home"},
-    {"find . -maxdepth 1 -type d", "List all dirs in current folder"}};
+    {"find /home -type d -name Dir1", "Find all dirs named \"Dir1\" in /home", {}},
+    {"find . -maxdepth 1 -type d", "List all dirs in current folder", {}}};
 
 static struct termios old;
 
@@ -81,11 +81,23 @@ void editLineAtIndex(int index, char *line)
     while ((c = getchar()) != '\n')
     {
         printf(CLEAR_LINE);
-        for (int j = strlen(line); j >= index; j--)
+        if (c == '\b' || c == '\x7F')
         {
-            line[j + 1] = line[j];
+            for (int i = index; i < strlen(line) - 1; i++)
+            {
+                line[i - 1] = line[i];
+            }
+            line[strlen(line) - 1] = (char)0;
+            index--;
         }
-        line[index++] = c;
+        else
+        {
+            for (int j = strlen(line); j >= index; j--)
+            {
+                line[j + 1] = line[j];
+            }
+            line[index++] = c;
+        }
 
         printf("%s", line);
         printf("\r");
@@ -93,18 +105,25 @@ void editLineAtIndex(int index, char *line)
     }
 }
 
-void editCommand(const char *inputLine)
+void editCommand(CommandInfo commandInfo)
 {
     char line[100];
-    strcpy(line, inputLine);
+    strcpy(line, commandInfo.command);
     printf("%s", line);
     fflush(stdout);
 
     enableNonCanonicalMode(false);
 
-    // TODO
-    // Change 6 to a var of int arr in CommandInfo, loop through and edit
-    editLineAtIndex(6, line);
+    for (int i = 0; i < sizeof(commandInfo.editIndexes) / sizeof(commandInfo.editIndexes[0]); i++)
+    {
+        if (commandInfo.editIndexes[i] == 0)
+        {
+            break;
+        }
+        editLineAtIndex(commandInfo.editIndexes[i], line);
+        printf("\033[1A"); // move cursor up because of enter key creates new line
+    }
+
     printf("\n%s\n", line);
 
     resetTerminalMode();
@@ -139,7 +158,7 @@ void printSelectableCommands(CommandInfo *commands, int size)
         printf(CLEAR_LINE);
     }
     resetTerminalMode();
-    // editCommand(commands[selectedLine].command);
+    editCommand(commands[selectedLine]);
 }
 
 void printFile()
