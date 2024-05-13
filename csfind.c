@@ -41,18 +41,14 @@ void handleSigint(int sig)
     exit(EXIT_FAILURE);
 }
 
-void enableNonCanonicalMode(bool disableEcho)
+void enableNonCanonicalMode()
 {
     struct termios new;
     tcgetattr(0, &new);
     // c_lflag = local mode
     // ICANON = canonincal mode
-    new.c_lflag &= ~ICANON;
-    if (disableEcho)
-    {
-        // ECHO = echos input to terminal
-        new.c_lflag &= ~ECHO;
-    }
+    // ECHO = echos input to terminal
+    new.c_lflag &= ~(ICANON | ECHO);
     // TCSANOW means apply changes immediately
     tcsetattr(0, TCSANOW, &new);
 }
@@ -112,7 +108,7 @@ void editCommand(CommandInfo commandInfo)
     printf("%s", line);
     fflush(stdout);
 
-    enableNonCanonicalMode(false);
+    enableNonCanonicalMode();
 
     for (int i = 0; i < sizeof(commandInfo.editIndexes) / sizeof(commandInfo.editIndexes[0]); i++)
     {
@@ -121,7 +117,6 @@ void editCommand(CommandInfo commandInfo)
             break;
         }
         editLineAtIndex(commandInfo.editIndexes[i], line);
-        printf("\033[1A"); // move cursor up because of enter key creates new line
     }
 
     printf("\n%s\n", line);
@@ -131,7 +126,7 @@ void editCommand(CommandInfo commandInfo)
 
 void printSelectableCommands(CommandInfo *commands, int size)
 {
-    enableNonCanonicalMode(true);
+    enableNonCanonicalMode();
     int selectedLine = 0;
     char input;
     while (1)
@@ -205,7 +200,7 @@ void printFindCheatSheet()
     int selectedOption = 0;
     char c;
 
-    enableNonCanonicalMode(true);
+    enableNonCanonicalMode();
     printf(HIDE_CURSOR);
 
     while (1)
