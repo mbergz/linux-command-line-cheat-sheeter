@@ -124,9 +124,9 @@ void editCommand(CommandInfo commandInfo)
         }
         editLineAtIndex(commandInfo.editIndexes[i], line, &offset);
     }
+    printf(CLEAR_LINE);
 
-    printf("\n%s\n", line);
-
+    printf("%s\n", line);
     resetTerminalMode();
 }
 
