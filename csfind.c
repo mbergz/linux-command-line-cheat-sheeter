@@ -68,8 +68,10 @@ void printCommands(CommandInfo *commands, int size, int selectedCommand)
     }
 }
 
-void editLineAtIndex(int index, char *line)
+void editLineAtIndex(int index, char *line, int *offset)
 {
+    int newOffset = 0;
+    index = index + *offset;
     printf("\r");
     printf("\033[%dC", index); // move cursor to starting pos
 
@@ -79,12 +81,13 @@ void editLineAtIndex(int index, char *line)
         printf(CLEAR_LINE);
         if (c == '\b' || c == '\x7F')
         {
-            for (int i = index; i < strlen(line) - 1; i++)
+            for (int i = index; i < strlen(line); i++)
             {
                 line[i - 1] = line[i];
             }
             line[strlen(line) - 1] = (char)0;
             index--;
+            newOffset--;
         }
         else
         {
@@ -93,12 +96,14 @@ void editLineAtIndex(int index, char *line)
                 line[j + 1] = line[j];
             }
             line[index++] = c;
+            newOffset++;
         }
 
         printf("%s", line);
         printf("\r");
         printf("\033[%dC", index);
     }
+    *offset = *offset + newOffset;
 }
 
 void editCommand(CommandInfo commandInfo)
@@ -110,13 +115,14 @@ void editCommand(CommandInfo commandInfo)
 
     enableNonCanonicalMode();
 
+    int offset = 0;
     for (int i = 0; i < sizeof(commandInfo.editIndexes) / sizeof(commandInfo.editIndexes[0]); i++)
     {
         if (commandInfo.editIndexes[i] == 0)
         {
             break;
         }
-        editLineAtIndex(commandInfo.editIndexes[i], line);
+        editLineAtIndex(commandInfo.editIndexes[i], line, &offset);
     }
 
     printf("\n%s\n", line);
