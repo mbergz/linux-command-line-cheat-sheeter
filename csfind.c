@@ -17,15 +17,15 @@
 #define CLEAR_LINE "\r\033[2K"
 
 static CommandInfo fileCommands[] = {
-    {"find . -name file.txt", "Find single file in current dir + sub dirs", {6, 16}},
-    {"find /home -name *.json", "Looks for all files ending with json in /home dir and sub-dirs", {}},
-    {"find . -maxdepth 1 -type f -regex '.*[12].*'", "Find all files in current dir only matching regex containg 1 or 2 in name ", {}},
-    {"find / -size +100M", "Find all files with size larger than 100MB", {}},
-    {"find / -mmin -60", "Find all files which are modified within last hour", {}}};
+    {"find . -name file.txt", "Find single file in current dir + sub dirs", {6, 21}},
+    {"find /home -name *.json", "Looks for all files ending with json in /home dir and sub-dirs", {10, 23}},
+    {"find . -maxdepth 1 -type f -regex '.*[12].*'", "Find all files in current dir only matching regex containg 1 or 2 in name ", {6, 18, 26, 44}},
+    {"find / -size +100M", "Find all files with size larger than 100MB", {6, 18}},
+    {"find / -mmin -60", "Find all files which are modified within last hour", {6, 16}}};
 
 static CommandInfo dirCommands[] = {
-    {"find /home -type d -name Dir1", "Find all dirs named \"Dir1\" in /home", {}},
-    {"find . -maxdepth 1 -type d", "List all dirs in current folder", {}}};
+    {"find /home -type d -name Dir1", "Find all dirs named \"Dir1\" in /home", {10, 18, 29}},
+    {"find . -maxdepth 1 -type d", "List all dirs in current folder", {6, 18, 26}}};
 
 static struct termios old;
 
