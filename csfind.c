@@ -174,8 +174,22 @@ void printDir()
 
 void printAll()
 {
-    printFile();
-    printDir();
+    int fileCommandsSize = sizeof(fileCommands) / sizeof(fileCommands[0]);
+    int dirCommandsSize = sizeof(dirCommands) / sizeof(dirCommands[0]);
+    int totalSize = fileCommandsSize + dirCommandsSize;
+
+    CommandInfo allCommands[totalSize];
+    int index = 0;
+    for (int i = 0; i < fileCommandsSize; i++)
+    {
+        allCommands[index++] = fileCommands[i];
+    }
+    for (int i = 0; i < dirCommandsSize; i++)
+    {
+        allCommands[index++] = dirCommands[i];
+    }
+
+    printSelectableCommands(allCommands, totalSize);
 }
 
 void printOptions(const char *options[], int selectedOption)
