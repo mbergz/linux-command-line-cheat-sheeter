@@ -10,4 +10,14 @@ struct CommandInfo
 
 typedef struct CommandInfo CommandInfo;
 
+void storeCurrentTerminalMode();
+void resetTerminalMode();
+void handleSigint(int sig);
+void enableNonCanonicalMode();
+void printCommands(CommandInfo *commands, int size, int selectedCommand);
+void editLineAtIndex(int index, char *line, int *offset);
+void editCommand(CommandInfo commandInfo);
+void printSelectableCommands(CommandInfo *commands, int size);
+void printOptions(const char *options[], int selectedOption, int maxOptions);
+
 #endif

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "csfind.h"
+#include "csgrep.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,6 +15,10 @@ int main(int argc, char *argv[])
         if (strcmp(argument, "find") == 0)
         {
             printFindCheatSheet();
+        }
+        else if (strcmp(argument, "grep") == 0)
+        {
+            printGrepCheatSheet();
         }
     }
     else

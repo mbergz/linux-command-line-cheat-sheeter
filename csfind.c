@@ -29,139 +29,6 @@ static CommandInfo dirCommands[] = {
 
 static struct termios old;
 
-void resetTerminalMode()
-{
-    printf(SHOW_CURSOR);
-    tcsetattr(0, TCSANOW, &old);
-}
-
-void handleSigint(int sig)
-{
-    resetTerminalMode(&old);
-    exit(EXIT_FAILURE);
-}
-
-void enableNonCanonicalMode()
-{
-    struct termios new;
-    tcgetattr(0, &new);
-    // c_lflag = local mode
-    // ICANON = canonincal mode
-    // ECHO = echos input to terminal
-    new.c_lflag &= ~(ICANON | ECHO);
-    // TCSANOW means apply changes immediately
-    tcsetattr(0, TCSANOW, &new);
-}
-
-void printCommands(CommandInfo *commands, int size, int selectedCommand)
-{
-    for (int i = 0; i < size; i++)
-    {
-        if (i == selectedCommand)
-        {
-            printf("> \e[1m%-50s\e[m %s\n", commands[i].command, commands[i].description);
-        }
-        else
-        {
-            printf("%-50s %s\n", commands[i].command, commands[i].description);
-        }
-    }
-}
-
-void editLineAtIndex(int index, char *line, int *offset)
-{
-    int newOffset = 0;
-    index = index + *offset;
-    printf("\r");
-    printf("\033[%dC", index); // move cursor to starting pos
-
-    char c;
-    while ((c = getchar()) != '\n')
-    {
-        printf(CLEAR_LINE);
-        if (c == '\b' || c == '\x7F')
-        {
-            for (int i = index; i < strlen(line); i++)
-            {
-                line[i - 1] = line[i];
-            }
-            line[strlen(line) - 1] = (char)0;
-            index--;
-            newOffset--;
-        }
-        else
-        {
-            for (int j = strlen(line); j >= index; j--)
-            {
-                line[j + 1] = line[j];
-            }
-            line[index++] = c;
-            newOffset++;
-        }
-
-        printf("%s", line);
-        printf("\r");
-        printf("\033[%dC", index);
-    }
-    *offset = *offset + newOffset;
-}
-
-void editCommand(CommandInfo commandInfo)
-{
-    char line[100];
-    strcpy(line, commandInfo.command);
-    printf("%s", line);
-    fflush(stdout);
-
-    enableNonCanonicalMode();
-
-    int offset = 0;
-    for (int i = 0; i < sizeof(commandInfo.editIndexes) / sizeof(commandInfo.editIndexes[0]); i++)
-    {
-        if (commandInfo.editIndexes[i] == 0)
-        {
-            break;
-        }
-        editLineAtIndex(commandInfo.editIndexes[i], line, &offset);
-    }
-    printf(CLEAR_LINE);
-
-    printf("%s\n", line);
-    resetTerminalMode();
-}
-
-void printSelectableCommands(CommandInfo *commands, int size)
-{
-    enableNonCanonicalMode();
-    int selectedLine = 0;
-    char input;
-    while (1)
-    {
-        printCommands(commands, size, selectedLine);
-        if (read(STDIN_FILENO, &input, 1) == -1)
-        {
-            perror("read");
-        }
-        if (input == '\t')
-        {
-            selectedLine = (selectedLine + 1) % size;
-            printf("\033[%dA", size); // move cursor up x lines
-        }
-        if (input == '\n')
-        {
-            break;
-        }
-    }
-    // Now erase all lines
-    for (int i = 0; i < size; i++)
-    {
-        printf("\033[%dA", 1);
-        printf(CLEAR_LINE);
-    }
-    resetTerminalMode();
-    editCommand(commands[selectedLine]);
-}
-
 void printFile()
 {
     printSelectableCommands(fileCommands, sizeof(fileCommands) / sizeof(fileCommands[0]));
@@ -192,7 +59,7 @@ void printAll()
     printSelectableCommands(allCommands, totalSize);
 }
 
-void printOptions(const char *options[], int selectedOption)
+void printFindOptions(const char *options[], int selectedOption)
 {
     printf(CLEAR_LINE);
 
@@ -213,8 +80,7 @@ void printOptions(const char *options[], int selectedOption)
 
 void printFindCheatSheet()
 {
-    // Store default terminos settings
-    tcgetattr(0, &old);
+    storeCurrentTerminalMode();
     signal(SIGINT, handleSigint);
     const char *options[MAX_OPTIONS] = {"*", "file", "dir"};
     int selectedOption = 0;
@@ -225,7 +91,7 @@ void printFindCheatSheet()
 
     while (1)
     {
-        printOptions(options, selectedOption);
+        printOptions(options, selectedOption, MAX_OPTIONS);
 
         if (read(STDIN_FILENO, &c, 1) == -1)
         {
