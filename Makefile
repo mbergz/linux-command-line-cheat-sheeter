@@ -18,4 +18,4 @@ $(TARGET): $(OBJS)
 
 # Clean up generated files
 clean:
-	rm -f $(OBJS) $(EXEC)
+	rm -f $(OBJS) $(TARGET)
