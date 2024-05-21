@@ -2,8 +2,6 @@ CC = gcc
 
 CFLAGS  = -g -Wall
 
-LIBS = -lncurses
-
 SRCS = main.c csfind.c csgrep.c common.c
 OBJS = $(SRCS:.c=.o)
 TARGET = cs
@@ -14,8 +12,8 @@ TARGET = cs
 
 # Linking
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $^
 
-# Clean up generated files
+# Clean up genearated files
 clean:
 	rm -f $(OBJS) $(TARGET)
