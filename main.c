@@ -14,21 +14,21 @@ int main(int argc, char *argv[])
     if (argc > 1)
     {
         argument = argv[1];
-    }
-    if (argument != NULL)
-    {
-        if (strcmp(argument, "find") == 0)
+        if (argument != NULL)
         {
-            printFindCheatSheet();
-        }
-        else if (strcmp(argument, "grep") == 0)
-        {
-            printGrepCheatSheet();
+            if (strcmp(argument, "find") == 0)
+            {
+                printFindCheatSheet();
+            }
+            else if (strcmp(argument, "grep") == 0)
+            {
+                printGrepCheatSheet();
+            }
         }
     }
     else
     {
-        printf("No arguments provided");
+        printf("No arguments provided\n");
     }
     return 0;
 }
