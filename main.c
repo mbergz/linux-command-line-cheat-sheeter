@@ -1,10 +1,15 @@
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 #include "csfind.h"
 #include "csgrep.h"
+#include "common.h"
 
 int main(int argc, char *argv[])
 {
+    storeCurrentTerminalMode();
+    signal(SIGINT, handleSigint);
+
     char *argument;
     if (argc > 1)
     {
