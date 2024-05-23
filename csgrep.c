@@ -10,8 +10,6 @@
 
 #define MAX_OPTIONS 1
 
-#define STD_OUT_REVERSE "\x1b[7m"
-#define STD_OUT_RESET "\x1b[0m"
 #define HIDE_CURSOR "\e[?25l"
 #define SHOW_CURSOR "\e[?25h"
 #define CLEAR_LINE "\r\033[2K"
