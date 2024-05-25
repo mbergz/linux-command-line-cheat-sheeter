@@ -158,14 +158,14 @@ void printSelectableCommands(CommandInfo *commands, int size)
         {
             perror("read");
         }
-        if (input == '\t')
-        {
-            selectedLine = (selectedLine + 1) % size;
-            printf("\033[%dA", size); // move cursor up x lines
-        }
         if (input == '\n')
         {
             break;
+        }
+        printf("\033[%dA", size); // move cursor up x lines
+        if (input == '\t')
+        {
+            selectedLine = (selectedLine + 1) % size;
         }
     }
     printf(SHOW_CURSOR);
