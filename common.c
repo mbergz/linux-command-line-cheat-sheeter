@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <ctype.h>
 #include <termios.h>
 #include <signal.h>
 #include "common.h"
@@ -98,9 +99,31 @@ void editLineAtIndex(int index, char *line, int *offset)
     *offset = *offset + newOffset;
 }
 
-void editCommand(CommandInfo commandInfo)
+void executeCommand(char *line)
 {
-    char line[100];
+    char temp[strlen(line) + 1];
+    strcpy(temp, line);
+    free(line);
+    printf("Execute? [y or enter]\n");
+
+    char c;
+    scanf("%c", &c);
+    c = toupper(c);
+
+    if (c == 'Y' || c == '\n')
+    {
+        if (c == 'Y')
+        {
+            printf("\n");
+        }
+        system(temp);
+    }
+}
+
+char *editCommand(CommandInfo commandInfo)
+{
+    char *line = (char *)malloc(100 * sizeof(char));
+    // char line[100];
     strcpy(line, commandInfo.command);
     printf("%s", line);
     fflush(stdout);
@@ -117,9 +140,9 @@ void editCommand(CommandInfo commandInfo)
         editLineAtIndex(commandInfo.editIndexes[i], line, &offset);
     }
     printf(CLEAR_LINE);
-
-    printf("%s\n", line);
     resetTerminalMode();
+
+    return line;
 }
 
 void printSelectableCommands(CommandInfo *commands, int size)
@@ -153,7 +176,10 @@ void printSelectableCommands(CommandInfo *commands, int size)
         printf(CLEAR_LINE);
     }
     resetTerminalMode();
-    editCommand(commands[selectedLine]);
+
+    char *edited = editCommand(commands[selectedLine]);
+    printf("%s\n", edited);
+    executeCommand(edited);
 }
 
 void printOptions(const char *options[], int selectedOption, int maxOptions)

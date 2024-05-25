@@ -80,8 +80,6 @@ void printFindOptions(const char *options[], int selectedOption)
 
 void printFindCheatSheet()
 {
-    storeCurrentTerminalMode();
-    signal(SIGINT, handleSigint);
     const char *options[MAX_OPTIONS] = {"*", "file", "dir"};
     int selectedOption = 0;
     char c;
