@@ -43,6 +43,7 @@ void enableNonCanonicalMode()
     // ECHO = echos input to terminal
     new.c_lflag &= ~(ICANON | ECHO);
     // TCSANOW means apply changes immediately
+
     tcsetattr(0, TCSANOW, &new);
 }
 
@@ -61,7 +62,7 @@ void printCommands(CommandInfo *commands, int size, int selectedCommand)
     }
 }
 
-void editLineAtIndex(int index, char *line, int *offset)
+int editLineAtIndex(int index, char *line, int *offset)
 {
     int newOffset = 0;
     index = index + *offset;
@@ -69,8 +70,17 @@ void editLineAtIndex(int index, char *line, int *offset)
     printf("\033[%dC", index); // move cursor to starting pos
 
     char c;
-    while ((c = getchar()) != '\n')
+    while (1)
     {
+        c = getchar();
+        if (c == '\n')
+        {
+            break;
+        }
+        if (c == 27)
+        { // ESC key pressed
+            return -1;
+        }
         printf(CLEAR_LINE);
         if (c == '\b' || c == '\x7F')
         {
@@ -97,6 +107,7 @@ void editLineAtIndex(int index, char *line, int *offset)
         printf("\033[%dC", index);
     }
     *offset = *offset + newOffset;
+    return 0;
 }
 
 void executeCommand(char *line)
@@ -123,7 +134,6 @@ void executeCommand(char *line)
 char *editCommand(CommandInfo commandInfo)
 {
     char *line = (char *)malloc(100 * sizeof(char));
-    // char line[100];
     strcpy(line, commandInfo.command);
     printf("%s", line);
     fflush(stdout);
@@ -137,7 +147,13 @@ char *editCommand(CommandInfo commandInfo)
         {
             break;
         }
-        editLineAtIndex(commandInfo.editIndexes[i], line, &offset);
+        int result = editLineAtIndex(commandInfo.editIndexes[i], line, &offset);
+        if (result == -1)
+        {
+            printf(CLEAR_LINE);
+            resetTerminalMode();
+            return NULL;
+        }
     }
     printf(CLEAR_LINE);
     resetTerminalMode();
@@ -201,8 +217,11 @@ void printSelectableCommands(CommandInfo *commands, int size)
     resetTerminalMode();
 
     char *edited = editCommand(commands[selectedLine]);
-    printf("%s\n", edited);
-    executeCommand(edited);
+    if (edited != NULL)
+    {
+        printf("%s\n", edited);
+        executeCommand(edited);
+    }
 }
 
 void printOptions(const char *options[], int selectedOption, int maxOptions)

@@ -15,7 +15,7 @@ void resetTerminalMode();
 void handleSigint(int sig);
 void enableNonCanonicalMode();
 void printCommands(CommandInfo *commands, int size, int selectedCommand);
-void editLineAtIndex(int index, char *line, int *offset);
+int editLineAtIndex(int index, char *line, int *offset);
 void executeCommand(char *line);
 char *editCommand(CommandInfo commandInfo);
 void printSelectableCommands(CommandInfo *commands, int size);
