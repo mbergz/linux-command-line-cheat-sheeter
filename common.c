@@ -150,22 +150,45 @@ void printSelectableCommands(CommandInfo *commands, int size)
     enableNonCanonicalMode();
     printf(HIDE_CURSOR);
     int selectedLine = 0;
-    char input;
+    char input[4];
     while (1)
     {
         printCommands(commands, size, selectedLine);
-        if (read(STDIN_FILENO, &input, 1) == -1)
+        memset(input, 0, sizeof(input));
+
+        if (read(STDIN_FILENO, input, sizeof(input)) == -1)
         {
             perror("read");
+            resetTerminalMode();
+            return;
         }
-        if (input == '\n')
+
+        if (input[0] == '\n')
         {
             break;
         }
+        if (input[0] == '\033' && input[1] == '\0')
+        {
+            // Only escape key pressed
+            break;
+        }
         printf("\033[%dA", size); // move cursor up x lines
-        if (input == '\t')
+        if (input[0] == '\t')
         {
             selectedLine = (selectedLine + 1) % size;
+        }
+        if (input[0] == '\033' && input[1] == '[')
+        {
+            if (input[2] == 'B')
+            {
+                // Down key pressed
+                selectedLine = (selectedLine + 1) % size;
+            }
+            else if (input[2] == 'A' || input[2] == 'Z')
+            {
+                // Up or shift+tab key pressed
+                selectedLine = (selectedLine - 1 + size) % size;
+            }
         }
     }
     printf(SHOW_CURSOR);
