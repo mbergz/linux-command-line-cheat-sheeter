@@ -187,7 +187,10 @@ void printSelectableCommands(CommandInfo *commands, int size)
         if (input[0] == '\033' && input[1] == '\0')
         {
             // Only escape key pressed
-            break;
+            printf("\033[%dA", size); // move cursor up x lines
+            printCommands(commands, size, -1);
+            resetTerminalMode();
+            return;
         }
         printf("\033[%dA", size); // move cursor up x lines
         if (input[0] == '\t')
