@@ -152,6 +152,7 @@ char *editCommand(CommandInfo commandInfo)
         {
             printf(CLEAR_LINE);
             resetTerminalMode();
+            printf("%s\n", line);
             return NULL;
         }
     }
