@@ -188,7 +188,7 @@ void printSelectableCommands(CommandInfo *commands, int size)
         {
             // Only escape key pressed
             printf("\033[%dA", size); // move cursor up x lines
-            printCommands(commands, size, -1);
+            printCommands(commands, size, -1); // -1 to not print >
             resetTerminalMode();
             return;
         }
