@@ -12,7 +12,11 @@
 
 static CommandInfo grepCommands[] = {
     {"grep boo file.txt", "Search the file.txt for a line matching boo", {8, 17}},
-    {"grep -i word file.txt", "Search the file.txt for a line matching case insensitive word", {12, 21}},
+    {"grep -i \"word\" file.txt", "Search the file.txt for a line matching case insensitive word", {14, 23}},
+    {"grep -c \"word\" file.txt", "Find number of lines that match word in file.txt", {14, 23}},
+    {"grep -n \"word\" file.txt", "Show line numberof liines that match word in file.txt", {14, 23}},
+    {"grep -l \"word\" *", "Find all the files match word in current dir", {14, 16}},
+    {"grep -rl \"word\" *", "Find all the files match word in current dir + recursive", {15, 17}},
 };
 
 void printGrepCheatSheet()
