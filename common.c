@@ -112,10 +112,11 @@ int editLineAtIndex(int index, char *line, int *offset)
 
 void executeCommand(char *line)
 {
+    printf("%s\n", line);
     char temp[strlen(line) + 1];
     strcpy(temp, line);
     free(line);
-    printf("Execute? [y or enter]\n");
+    printf("\033[31mExecute? [y or enter]\033[0m\n");
 
     char c;
     scanf("%c", &c);
@@ -134,6 +135,11 @@ void executeCommand(char *line)
 char *editCommand(CommandInfo commandInfo)
 {
     char *line = (char *)malloc(100 * sizeof(char));
+    if (line == NULL)
+    {
+        perror("malloc");
+        return NULL;
+    }
     strcpy(line, commandInfo.command);
     printf("%s", line);
     fflush(stdout);
@@ -221,10 +227,6 @@ char *getCommand(CommandInfo *commands, int size)
     resetTerminalMode();
 
     char *edited = editCommand(commands[selectedLine]);
-    if (edited != NULL)
-    {
-        printf("%s\n", edited);
-    }
     return edited;
 }
 

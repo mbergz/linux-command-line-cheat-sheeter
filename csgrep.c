@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <ctype.h>
 #include <termios.h>
 #include <signal.h>
 #include "csfind.h"
@@ -25,6 +26,32 @@ void grepCheatSheet()
     char *command = getCommand(grepCommands, sizeof(grepCommands) / sizeof(grepCommands[0]));
     if (command != NULL)
     {
-        executeCommand(command);
+        printf("%s\n", command);
+        printf("\033[90mAdd color to output? [y or enter] \033[0m ");
+        char c;
+        scanf("%c", &c);
+        c = toupper(c);
+
+        if (c == 'Y' || c == '\n')
+        {
+            // replace grep with grep --color=always
+            const char *grepWithColor = "grep --color=always";
+            size_t newLength = strlen(grepWithColor) + strlen(command) - 3;
+            char *modified = malloc(newLength);
+            if (modified == NULL)
+            {
+                perror("malloc");
+                return;
+            }
+            strcpy(modified, grepWithColor);
+            strcat(modified, command + 4); // Move pointer 4 steps
+            free(command);
+
+            executeCommand(modified);
+        }
+        else
+        {
+            executeCommand(command);
+        }
     }
 }
