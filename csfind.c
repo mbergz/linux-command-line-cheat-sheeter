@@ -27,19 +27,25 @@ static CommandInfo dirCommands[] = {
     {"find /home -type d -name Dir1", "Find all dirs named \"Dir1\" in /home", {10, 18, 29}},
     {"find . -maxdepth 1 -type d", "List all dirs in current folder", {6, 18, 26}}};
 
-static struct termios old;
-
-void printFile()
+void handleFile()
 {
-    printSelectableCommands(fileCommands, sizeof(fileCommands) / sizeof(fileCommands[0]));
+    char *command = getCommand(fileCommands, sizeof(fileCommands) / sizeof(fileCommands[0]));
+    if (command != NULL)
+    {
+        executeCommand(command);
+    }
 }
 
-void printDir()
+void handleDir()
 {
-    printSelectableCommands(dirCommands, sizeof(dirCommands) / sizeof(dirCommands[0]));
+    char *command = getCommand(dirCommands, sizeof(dirCommands) / sizeof(dirCommands[0]));
+    if (command != NULL)
+    {
+        executeCommand(command);
+    }
 }
 
-void printAll()
+void handleAll()
 {
     int fileCommandsSize = sizeof(fileCommands) / sizeof(fileCommands[0]);
     int dirCommandsSize = sizeof(dirCommands) / sizeof(dirCommands[0]);
@@ -56,9 +62,14 @@ void printAll()
         allCommands[index++] = dirCommands[i];
     }
 
-    printSelectableCommands(allCommands, totalSize);
+    char *command = getCommand(allCommands, totalSize);
+    if (command != NULL)
+    {
+        executeCommand(command);
+    }
 }
 
+/*
 void printFindOptions(const char *options[], int selectedOption)
 {
     printf(CLEAR_LINE);
@@ -77,8 +88,8 @@ void printFindOptions(const char *options[], int selectedOption)
 
     fflush(stdout);
 }
-
-void printFindCheatSheet()
+*/
+void findCheatSheet()
 {
     const char *options[MAX_OPTIONS] = {"*", "file", "dir"};
     int selectedOption = 0;
@@ -114,13 +125,13 @@ void printFindCheatSheet()
     switch (selectedOption)
     {
     case 0:
-        printAll();
+        handleAll();
         break;
     case 1:
-        printFile();
+        handleFile();
         break;
     case 2:
-        printDir();
+        handleDir();
         break;
     default:
         break;

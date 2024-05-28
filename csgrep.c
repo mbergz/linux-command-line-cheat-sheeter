@@ -17,9 +17,14 @@ static CommandInfo grepCommands[] = {
     {"grep -n \"word\" file.txt", "Show line numberof liines that match word in file.txt", {14, 23}},
     {"grep -l \"word\" *", "Find all the files match word in current dir", {14, 16}},
     {"grep -rl \"word\" *", "Find all the files match word in current dir + recursive", {15, 17}},
+    {"grep -i --color=always \"word\" *.c", "Find all the files match word in current dir + recursive", {15, 17}},
 };
 
-void printGrepCheatSheet()
+void grepCheatSheet()
 {
-    printSelectableCommands(grepCommands, sizeof(grepCommands) / sizeof(grepCommands[0]));
+    char *command = getCommand(grepCommands, sizeof(grepCommands) / sizeof(grepCommands[0]));
+    if (command != NULL)
+    {
+        executeCommand(command);
+    }
 }

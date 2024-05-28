@@ -18,11 +18,11 @@ int main(int argc, char *argv[])
         {
             if (strcmp(argument, "find") == 0)
             {
-                printFindCheatSheet();
+                findCheatSheet();
             }
             else if (strcmp(argument, "grep") == 0)
             {
-                printGrepCheatSheet();
+                grepCheatSheet();
             }
         }
     }

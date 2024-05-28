@@ -162,7 +162,7 @@ char *editCommand(CommandInfo commandInfo)
     return line;
 }
 
-void printSelectableCommands(CommandInfo *commands, int size)
+char *getCommand(CommandInfo *commands, int size)
 {
     enableNonCanonicalMode();
     printf(HIDE_CURSOR);
@@ -177,7 +177,7 @@ void printSelectableCommands(CommandInfo *commands, int size)
         {
             perror("read");
             resetTerminalMode();
-            return;
+            return NULL;
         }
 
         if (input[0] == '\n')
@@ -187,10 +187,10 @@ void printSelectableCommands(CommandInfo *commands, int size)
         if (input[0] == '\033' && input[1] == '\0')
         {
             // Only escape key pressed
-            printf("\033[%dA", size); // move cursor up x lines
+            printf("\033[%dA", size);          // move cursor up x lines
             printCommands(commands, size, -1); // -1 to not print >
             resetTerminalMode();
-            return;
+            return NULL;
         }
         printf("\033[%dA", size); // move cursor up x lines
         if (input[0] == '\t')
@@ -224,8 +224,8 @@ void printSelectableCommands(CommandInfo *commands, int size)
     if (edited != NULL)
     {
         printf("%s\n", edited);
-        executeCommand(edited);
     }
+    return edited;
 }
 
 void printOptions(const char *options[], int selectedOption, int maxOptions)

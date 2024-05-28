@@ -1,6 +1,6 @@
 #ifndef CSGREP_H
 #define CSGREP_H
 
-void printGrepCheatSheet();
+void grepCheatSheet();
 
 #endif // CSGREP_H
