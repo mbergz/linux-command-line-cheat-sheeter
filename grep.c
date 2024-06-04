@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <termios.h>
 #include <signal.h>
-#include "csfind.h"
+#include "grep.h"
 #include "common.h"
 
 #define MAX_OPTIONS 1

@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <signal.h>
-#include "csfind.h"
+#include "find.h"
 #include "common.h"
 
 #define MAX_OPTIONS 3

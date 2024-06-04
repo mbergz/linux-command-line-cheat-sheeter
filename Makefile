@@ -2,7 +2,7 @@ CC = gcc
 
 CFLAGS  = -g -Wall
 
-SRCS = main.c csfind.c csgrep.c common.c
+SRCS = main.c find.c grep.c common.c
 OBJS = $(SRCS:.c=.o)
 TARGET = cs
 
@@ -14,6 +14,6 @@ TARGET = cs
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
-# Clean up genearated files
+# Clean up generated files
 clean:
 	rm -f $(OBJS) $(TARGET)

@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
-#include "csfind.h"
-#include "csgrep.h"
+#include "find.h"
+#include "grep.h"
 #include "common.h"
 
 int main(int argc, char *argv[])
