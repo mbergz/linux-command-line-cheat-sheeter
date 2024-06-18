@@ -7,12 +7,17 @@
 #include <termios.h>
 #include <signal.h>
 #include "common.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #define STD_OUT_REVERSE "\x1b[7m"
 #define STD_OUT_RESET "\x1b[0m"
 #define HIDE_CURSOR "\e[?25l"
 #define SHOW_CURSOR "\e[?25h"
 #define CLEAR_LINE "\r\033[2K"
+
+#define ANSI_COLOR_LIGHT_GRAY "\033[90m"
+#define ANSI_COLOR_RESET "\033[0m"
 
 static struct termios old;
 
@@ -62,6 +67,19 @@ void printCommands(CommandInfo *commands, int size, int selectedCommand)
     }
 }
 
+void insertString(char *line, int index, char *strToInsert)
+{
+    int lineLen = strlen(line);
+    int insertLen = strlen(strToInsert);
+
+    for (int j = lineLen; j >= index; j--)
+    {
+        line[j + insertLen] = line[j];
+    }
+
+    strncpy(line + index, strToInsert, insertLen);
+}
+
 int editLineAtIndex(int index, char *line, int *offset)
 {
     int newOffset = 0;
@@ -91,6 +109,19 @@ int editLineAtIndex(int index, char *line, int *offset)
             line[strlen(line) - 1] = (char)0;
             index--;
             newOffset--;
+        }
+        else if (c == '\t')
+        { // Tab pressed
+            resetTerminalMode();
+            printf(ANSI_COLOR_LIGHT_GRAY);
+            char *input = readline("");
+            printf(ANSI_COLOR_RESET);
+            enableNonCanonicalMode();
+
+            insertString(line, index, input);
+            newOffset = newOffset + strlen(input);
+            index = index + strlen(input);
+            free(input);
         }
         else
         {

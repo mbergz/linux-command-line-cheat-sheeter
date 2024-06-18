@@ -1,6 +1,7 @@
 CC = gcc
 
 CFLAGS  = -g -Wall
+LDFLAGS = -lreadline
 
 SRCS=$(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
@@ -12,7 +13,7 @@ TARGET = cs
 
 # Linking
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Clean up generated files
 clean:

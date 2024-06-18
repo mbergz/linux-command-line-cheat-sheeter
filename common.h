@@ -15,6 +15,7 @@ void resetTerminalMode();
 void handleSigint(int sig);
 void enableNonCanonicalMode();
 void printCommands(CommandInfo *commands, int size, int selectedCommand);
+void insertString(char *line, int index, char *strToInsert);
 int editLineAtIndex(int index, char *line, int *offset);
 void executeCommand(char *line);
 char *editCommand(CommandInfo commandInfo);
