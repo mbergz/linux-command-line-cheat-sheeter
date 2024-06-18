@@ -69,26 +69,6 @@ void handleAll()
     }
 }
 
-/*
-void printFindOptions(const char *options[], int selectedOption)
-{
-    printf(CLEAR_LINE);
-
-    for (int i = 0; i < MAX_OPTIONS; ++i)
-    {
-        if (i == selectedOption)
-        {
-            printf("%s%s%s ", STD_OUT_REVERSE, options[i], STD_OUT_RESET); // Print highlighted option
-        }
-        else
-        {
-            printf("%s ", options[i]);
-        }
-    }
-
-    fflush(stdout);
-}
-*/
 void findCheatSheet()
 {
     const char *options[MAX_OPTIONS] = {"*", "file", "dir"};
