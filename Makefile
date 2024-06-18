@@ -2,7 +2,7 @@ CC = gcc
 
 CFLAGS  = -g -Wall
 
-SRCS = main.c find.c grep.c common.c
+SRCS=$(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
 TARGET = cs
 
