@@ -80,6 +80,29 @@ void insertString(char *line, int index, char *strToInsert)
     strncpy(line + index, strToInsert, insertLen);
 }
 
+void handleTabPress(char *line, int *index, int *newOffset)
+{
+    resetTerminalMode();
+
+    char *input = NULL;
+    char prompt[100];
+
+    strcpy(prompt, ANSI_COLOR_LIGHT_GRAY);
+    strcat(prompt, "> ");
+    strcat(prompt, ANSI_COLOR_RESET);
+
+    input = readline(prompt);
+
+    enableNonCanonicalMode();
+    printf("\033[1A");
+    printf(CLEAR_LINE);
+
+    insertString(line, *index, input);
+    *newOffset += strlen(input);
+    *index += strlen(input);
+    free(input);
+}
+
 int editLineAtIndex(int index, char *line, int *offset)
 {
     int newOffset = 0;
@@ -112,16 +135,7 @@ int editLineAtIndex(int index, char *line, int *offset)
         }
         else if (c == '\t')
         { // Tab pressed
-            resetTerminalMode();
-            printf(ANSI_COLOR_LIGHT_GRAY);
-            char *input = readline("");
-            printf(ANSI_COLOR_RESET);
-            enableNonCanonicalMode();
-
-            insertString(line, index, input);
-            newOffset = newOffset + strlen(input);
-            index = index + strlen(input);
-            free(input);
+            handleTabPress(line, &index, &newOffset);
         }
         else
         {
