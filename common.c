@@ -103,6 +103,26 @@ void handleTabPress(char *line, int *index, int *newOffset)
     free(input);
 }
 
+void handleArrowKeys(char *line, int *index)
+{
+    printf(CLEAR_LINE);
+    char next = getchar();
+    if (next == 68)
+    { // left
+        if (*index > 0)
+        {
+            (*index)--;
+        }
+    }
+    else if (next == 67)
+    { // right
+        if (*index < strlen(line))
+        {
+            (*index)++;
+        }
+    }
+}
+
 int editLineAtIndex(int index, char *line, int *offset)
 {
     int newOffset = 0;
@@ -119,12 +139,19 @@ int editLineAtIndex(int index, char *line, int *offset)
             break;
         }
         if (c == 27)
-        { // ESC key pressed
-            return -1;
-        }
-        printf(CLEAR_LINE);
-        if (c == '\b' || c == '\x7F')
         {
+            if (getchar() == 91)
+            {
+                handleArrowKeys(line, &index);
+            }
+            else
+            { // only ESC key pressed
+                return -1;
+            }
+        }
+        else if (c == '\b' || c == '\x7F')
+        {
+            printf(CLEAR_LINE);
             for (int i = index; i < strlen(line); i++)
             {
                 line[i - 1] = line[i];
@@ -135,10 +162,12 @@ int editLineAtIndex(int index, char *line, int *offset)
         }
         else if (c == '\t')
         { // Tab pressed
+            printf(CLEAR_LINE);
             handleTabPress(line, &index, &newOffset);
         }
         else
         {
+            printf(CLEAR_LINE);
             for (int j = strlen(line); j >= index; j--)
             {
                 line[j + 1] = line[j];
