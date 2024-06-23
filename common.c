@@ -17,6 +17,7 @@
 #define CLEAR_LINE "\r\033[2K"
 
 #define ANSI_COLOR_LIGHT_GRAY "\033[90m"
+#define ANSI_COLOR_DARK_YELLOW "\033[33m"
 #define ANSI_COLOR_RESET "\033[0m"
 
 static struct termios old;
@@ -82,21 +83,22 @@ void insertString(char *line, int index, char *strToInsert)
 
 void handleTabPress(char *line, int *index, int *newOffset)
 {
-    printf(CLEAR_LINE);
+    printf("\033[1B"); // Move cursor down one line
     resetTerminalMode();
 
     char *input = NULL;
     char prompt[100];
 
     strcpy(prompt, ANSI_COLOR_LIGHT_GRAY);
-    strcat(prompt, "> ");
-    strcat(prompt, ANSI_COLOR_RESET);
+    strcat(prompt, "↳ ");
+    strcat(prompt, ANSI_COLOR_DARK_YELLOW);
 
     input = readline(prompt);
 
     enableNonCanonicalMode();
     printf("\033[1A");
     printf(CLEAR_LINE);
+    printf(ANSI_COLOR_RESET);
 
     insertString(line, *index, input);
     *newOffset += strlen(input);
