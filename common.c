@@ -82,6 +82,7 @@ void insertString(char *line, int index, char *strToInsert)
 
 void handleTabPress(char *line, int *index, int *newOffset)
 {
+    printf(CLEAR_LINE);
     resetTerminalMode();
 
     char *input = NULL;
@@ -123,6 +124,33 @@ void handleArrowKeys(char *line, int *index)
     }
 }
 
+void handleBackspace(char *line, int *index, int *newOffset)
+{
+    printf(CLEAR_LINE);
+    if (*index <= 0)
+    {
+        return;
+    }
+    for (int i = *index; i < strlen(line); i++)
+    {
+        line[i - 1] = line[i];
+    }
+    line[strlen(line) - 1] = (char)0;
+    (*index)--;
+    (*newOffset)--;
+}
+
+void handleInsertion(char *line, int *index, int *newOffset, char c)
+{
+    printf(CLEAR_LINE);
+    for (int j = strlen(line); j >= *index; j--)
+    {
+        line[j + 1] = line[j];
+    }
+    line[(*index)++] = c;
+    (*newOffset)++;
+}
+
 int editLineAtIndex(int index, char *line, int *offset)
 {
     int newOffset = 0;
@@ -151,29 +179,15 @@ int editLineAtIndex(int index, char *line, int *offset)
         }
         else if (c == '\b' || c == '\x7F')
         {
-            printf(CLEAR_LINE);
-            for (int i = index; i < strlen(line); i++)
-            {
-                line[i - 1] = line[i];
-            }
-            line[strlen(line) - 1] = (char)0;
-            index--;
-            newOffset--;
+            handleBackspace(line, &index, &newOffset);
         }
         else if (c == '\t')
         { // Tab pressed
-            printf(CLEAR_LINE);
             handleTabPress(line, &index, &newOffset);
         }
         else
         {
-            printf(CLEAR_LINE);
-            for (int j = strlen(line); j >= index; j--)
-            {
-                line[j + 1] = line[j];
-            }
-            line[index++] = c;
-            newOffset++;
+            handleInsertion(line, &index, &newOffset, c);
         }
 
         printf("%s", line);
