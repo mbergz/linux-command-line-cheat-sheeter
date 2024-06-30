@@ -22,6 +22,8 @@
 
 static struct termios old;
 
+static int readlineActive = 0;
+
 void storeCurrentTerminalMode()
 {
     // Store default terminos settings
@@ -53,7 +55,7 @@ void enableNonCanonicalMode()
     tcsetattr(0, TCSANOW, &new);
 }
 
-void printCommands(CommandInfo *commands, int size, int selectedCommand)
+static void printCommands(CommandInfo *commands, int size, int selectedCommand)
 {
     for (int i = 0; i < size; i++)
     {
@@ -68,7 +70,7 @@ void printCommands(CommandInfo *commands, int size, int selectedCommand)
     }
 }
 
-void insertString(char *line, int index, char *strToInsert)
+static void insertString(char *line, int index, char *strToInsert)
 {
     int lineLen = strlen(line);
     int insertLen = strlen(strToInsert);
@@ -81,29 +83,82 @@ void insertString(char *line, int index, char *strToInsert)
     strncpy(line + index, strToInsert, insertLen);
 }
 
-void handleTabPress(char *line, int *index, int *newOffset)
+static void line_handler(char *line)
 {
-    printf("\033[1B"); // Move cursor down one line
-    resetTerminalMode();
+    if (line == NULL)
+    {
+        printf("\n");
+        rl_callback_handler_remove();
+    }
+    else
+    {
+        readlineActive = 0;
+        free(line);
+    }
+}
 
-    char *input = NULL;
-    char prompt[100];
+static void feed_character_to_readline(char c)
+{
+    rl_line_buffer[rl_point++] = c;
+    rl_end++;
+    rl_line_buffer[rl_end] = '\0';
+    rl_redisplay();
+}
 
-    strcpy(prompt, ANSI_COLOR_LIGHT_GRAY);
-    strcat(prompt, "↳ ");
-    strcat(prompt, ANSI_COLOR_DARK_YELLOW);
+static void cleanup_readline()
+{
+    rl_clear_history();
+    rl_deprep_terminal();
+    rl_cleanup_after_signal();
+    rl_free_line_state();
+    rl_reset_line_state();
+}
 
-    input = readline(prompt);
+static char *handleTabPress(char *line, int *index, int *newOffset)
+{
+    if (*index > 0 && line[*index - 1] == '/')
+    {
 
-    enableNonCanonicalMode();
-    printf("\033[1A");
-    printf(CLEAR_LINE);
-    printf(ANSI_COLOR_RESET);
+        rl_callback_handler_install("", line_handler);
 
-    insertString(line, *index, input);
-    *newOffset += strlen(input);
-    *index += strlen(input);
-    free(input);
+        feed_character_to_readline('/');
+
+        readlineActive = 1;
+
+        char *lineCopy = malloc(100);
+        if (lineCopy == NULL)
+        {
+            fprintf(stderr, "Memory allocation failed\n");
+            exit(EXIT_FAILURE);
+        }
+        int bufferLen = 0;
+
+        while (readlineActive)
+        {
+            rl_callback_read_char();
+            if (rl_line_buffer[0] != '\0')
+            {
+                printf(CLEAR_LINE);
+                strcpy(lineCopy, line);
+
+                insertString(lineCopy, *index, rl_line_buffer + 1);
+                bufferLen = strlen(rl_line_buffer) - 1;
+                printf("%s", lineCopy);
+
+                printf("\r");
+                printf("\033[%dC", (*index + rl_point - 1));
+                fflush(stdout);
+            }
+        }
+        rl_callback_handler_remove();
+        cleanup_readline();
+
+        *newOffset += bufferLen;
+        *index += bufferLen;
+
+        return lineCopy;
+    }
+    return NULL;
 }
 
 void handleArrowKeys(char *line, int *index)
@@ -153,7 +208,7 @@ void handleInsertion(char *line, int *index, int *newOffset, char c)
     (*newOffset)++;
 }
 
-int editLineAtIndex(int index, char *line, int *offset)
+static int editLineAtIndex(int index, char **line, int *offset)
 {
     int newOffset = 0;
     index = index + *offset;
@@ -172,7 +227,7 @@ int editLineAtIndex(int index, char *line, int *offset)
         {
             if (getchar() == 91)
             {
-                handleArrowKeys(line, &index);
+                handleArrowKeys(*line, &index);
             }
             else
             { // only ESC key pressed
@@ -181,18 +236,28 @@ int editLineAtIndex(int index, char *line, int *offset)
         }
         else if (c == '\b' || c == '\x7F')
         {
-            handleBackspace(line, &index, &newOffset);
+            handleBackspace(*line, &index, &newOffset);
         }
         else if (c == '\t')
-        { // Tab pressed
-            handleTabPress(line, &index, &newOffset);
+        {
+            char *result = handleTabPress(*line, &index, &newOffset);
+            if (result != NULL)
+            {
+                free(*line);
+                *line = result;
+                break;
+            }
+            else
+            {
+                continue;
+            }
         }
         else
         {
-            handleInsertion(line, &index, &newOffset, c);
+            handleInsertion(*line, &index, &newOffset, c);
         }
 
-        printf("%s", line);
+        printf("%s", *line);
         printf("\r");
         printf("\033[%dC", index);
     }
@@ -222,7 +287,7 @@ void executeCommand(char *line)
     }
 }
 
-char *editCommand(CommandInfo commandInfo)
+static char *editCommand(CommandInfo commandInfo)
 {
     char *line = (char *)malloc(100 * sizeof(char));
     if (line == NULL)
@@ -243,7 +308,7 @@ char *editCommand(CommandInfo commandInfo)
         {
             break;
         }
-        int result = editLineAtIndex(commandInfo.editIndexes[i], line, &offset);
+        int result = editLineAtIndex(commandInfo.editIndexes[i], &line, &offset);
         if (result == -1)
         {
             printf(CLEAR_LINE);
