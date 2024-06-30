@@ -70,19 +70,6 @@ static void printCommands(CommandInfo *commands, int size, int selectedCommand)
     }
 }
 
-static void insertString(char *line, int index, char *strToInsert)
-{
-    int lineLen = strlen(line);
-    int insertLen = strlen(strToInsert);
-
-    for (int j = lineLen; j >= index; j--)
-    {
-        line[j + insertLen] = line[j];
-    }
-
-    strncpy(line + index, strToInsert, insertLen);
-}
-
 static void line_handler(char *line)
 {
     if (line == NULL)
@@ -97,14 +84,6 @@ static void line_handler(char *line)
     }
 }
 
-static void feed_character_to_readline(char c)
-{
-    rl_line_buffer[rl_point++] = c;
-    rl_end++;
-    rl_line_buffer[rl_end] = '\0';
-    rl_redisplay();
-}
-
 static void cleanup_readline()
 {
     rl_clear_history();
@@ -114,154 +93,58 @@ static void cleanup_readline()
     rl_reset_line_state();
 }
 
-static char *handleTabPress(char *line, int *index, int *newOffset)
+static void feed_line_to_readline(const char *line)
 {
-    if (*index > 0 && line[*index - 1] == '/')
-    {
-
-        rl_callback_handler_install("", line_handler);
-
-        feed_character_to_readline('/');
-
-        readlineActive = 1;
-
-        char *lineCopy = malloc(100);
-        if (lineCopy == NULL)
-        {
-            fprintf(stderr, "Memory allocation failed\n");
-            exit(EXIT_FAILURE);
-        }
-        int bufferLen = 0;
-
-        while (readlineActive)
-        {
-            rl_callback_read_char();
-            if (rl_line_buffer[0] != '\0')
-            {
-                printf(CLEAR_LINE);
-                strcpy(lineCopy, line);
-
-                insertString(lineCopy, *index, rl_line_buffer + 1);
-                bufferLen = strlen(rl_line_buffer) - 1;
-                printf("%s", lineCopy);
-
-                printf("\r");
-                printf("\033[%dC", (*index + rl_point - 1));
-                fflush(stdout);
-            }
-        }
-        rl_callback_handler_remove();
-        cleanup_readline();
-
-        *newOffset += bufferLen;
-        *index += bufferLen;
-
-        return lineCopy;
-    }
-    return NULL;
-}
-
-void handleArrowKeys(char *line, int *index)
-{
-    printf(CLEAR_LINE);
-    char next = getchar();
-    if (next == 68)
-    { // left
-        if (*index > 0)
-        {
-            (*index)--;
-        }
-    }
-    else if (next == 67)
-    { // right
-        if (*index < strlen(line))
-        {
-            (*index)++;
-        }
-    }
-}
-
-void handleBackspace(char *line, int *index, int *newOffset)
-{
-    printf(CLEAR_LINE);
-    if (*index <= 0)
-    {
-        return;
-    }
-    for (int i = *index; i < strlen(line); i++)
-    {
-        line[i - 1] = line[i];
-    }
-    line[strlen(line) - 1] = (char)0;
-    (*index)--;
-    (*newOffset)--;
-}
-
-void handleInsertion(char *line, int *index, int *newOffset, char c)
-{
-    printf(CLEAR_LINE);
-    for (int j = strlen(line); j >= *index; j--)
-    {
-        line[j + 1] = line[j];
-    }
-    line[(*index)++] = c;
-    (*newOffset)++;
+    rl_replace_line(line, 0);
+    rl_redisplay();
 }
 
 static int editLineAtIndex(int index, char **line, int *offset)
 {
-    int newOffset = 0;
     index = index + *offset;
     printf("\r");
     printf("\033[%dC", index); // move cursor to starting pos
 
-    char c;
-    while (1)
-    {
-        c = getchar();
-        if (c == '\n')
-        {
-            break;
-        }
-        if (c == 27)
-        {
-            if (getchar() == 91)
-            {
-                handleArrowKeys(*line, &index);
-            }
-            else
-            { // only ESC key pressed
-                return -1;
-            }
-        }
-        else if (c == '\b' || c == '\x7F')
-        {
-            handleBackspace(*line, &index, &newOffset);
-        }
-        else if (c == '\t')
-        {
-            char *result = handleTabPress(*line, &index, &newOffset);
-            if (result != NULL)
-            {
-                free(*line);
-                *line = result;
-                break;
-            }
-            else
-            {
-                continue;
-            }
-        }
-        else
-        {
-            handleInsertion(*line, &index, &newOffset, c);
-        }
+    rl_callback_handler_install("", line_handler);
+    feed_line_to_readline(*line);
 
-        printf("%s", *line);
-        printf("\r");
-        printf("\033[%dC", index);
+    // Set readline pointer to index
+    rl_point = index;
+
+    readlineActive = 1;
+
+    char *lineCopy = malloc(100);
+    if (lineCopy == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
     }
-    *offset = *offset + newOffset;
+
+    strcpy(lineCopy, *line);
+
+    while (readlineActive)
+    {
+        rl_callback_read_char();
+        if (rl_line_buffer[0] != '\0')
+        {
+            printf(CLEAR_LINE);
+            strcpy(lineCopy, rl_line_buffer);
+
+            printf("%s", lineCopy);
+
+            printf("\r");
+            printf("\033[%dC", rl_point);
+            fflush(stdout);
+        }
+    }
+    rl_callback_handler_remove();
+    cleanup_readline();
+
+    printf("%s", lineCopy);
+
+    *offset += (strlen(lineCopy) - strlen(*line));
+    free(*line);
+    *line = lineCopy;
     return 0;
 }
 
