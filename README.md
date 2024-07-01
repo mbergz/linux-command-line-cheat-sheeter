@@ -14,11 +14,10 @@ To build, simply run
 make
 ````
 In the current directory.
-This will output an executable called 'cs'.
 
-To use from anywhere, place in e.g. /usr/local/bin
+To install and use from anywhere, run
 ````
-sudo mv cs /usr/local/bin
+make install
 ````
 
 
