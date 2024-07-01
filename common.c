@@ -70,7 +70,7 @@ static void printCommands(CommandInfo *commands, int size, int selectedCommand)
     }
 }
 
-static void line_handler(char *line)
+static void lineHandler(char *line)
 {
     if (line == NULL)
     {
@@ -84,7 +84,7 @@ static void line_handler(char *line)
     }
 }
 
-static void cleanup_readline()
+static void cleanupReadline()
 {
     rl_clear_history();
     rl_deprep_terminal();
@@ -93,7 +93,7 @@ static void cleanup_readline()
     rl_reset_line_state();
 }
 
-static void feed_line_to_readline(const char *line)
+static void feedLineToReadline(const char *line)
 {
     rl_replace_line(line, 0);
     rl_redisplay();
@@ -105,8 +105,8 @@ static int editLineAtIndex(int index, char **line, int *offset)
     printf("\r");
     printf("\033[%dC", index); // move cursor to starting pos
 
-    rl_callback_handler_install("", line_handler);
-    feed_line_to_readline(*line);
+    rl_callback_handler_install("", lineHandler);
+    feedLineToReadline(*line);
 
     // Set readline pointer to index
     rl_point = index;
@@ -138,7 +138,7 @@ static int editLineAtIndex(int index, char **line, int *offset)
         }
     }
     rl_callback_handler_remove();
-    cleanup_readline();
+    cleanupReadline();
 
     printf("%s", lineCopy);
 
