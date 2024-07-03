@@ -6,6 +6,13 @@
 #include "sed.h"
 #include "common.h"
 
+void printHelp()
+{
+    printf("find\n");
+    printf("grep\n");
+    printf("sed\n");
+}
+
 int main(int argc, char *argv[])
 {
     storeCurrentTerminalMode();
@@ -17,6 +24,10 @@ int main(int argc, char *argv[])
         argument = argv[1];
         if (argument != NULL)
         {
+            if (strcmp(argument, "-h") == 0)
+            {
+                printHelp();
+            }
             if (strcmp(argument, "find") == 0)
             {
                 findCheatSheet();
@@ -34,6 +45,7 @@ int main(int argc, char *argv[])
     else
     {
         printf("No arguments provided\n");
+        printf("Run with \"-h\" flag for all available commands\n");
     }
     return 0;
 }
