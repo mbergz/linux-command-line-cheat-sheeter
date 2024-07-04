@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
         argument = argv[1];
         if (argument != NULL)
         {
-            if (strcmp(argument, "-h") == 0)
+            if (strcmp(argument, "-h") == 0 || strcmp(argument, "help") == 0)
             {
                 printHelp();
             }
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     else
     {
         printf("No arguments provided\n");
-        printf("Run with \"-h\" flag for all available commands\n");
+        printf("Run with \"-h\" or \"help\" flag for all available commands\n");
     }
     return 0;
 }
