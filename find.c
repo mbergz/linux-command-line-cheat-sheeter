@@ -7,6 +7,7 @@
 #include <signal.h>
 #include "find.h"
 #include "common.h"
+#include "filewriter.h"
 
 #define MAX_OPTIONS 3
 
@@ -32,7 +33,7 @@ void handleFile()
     char *command = getCommand(fileCommands, sizeof(fileCommands) / sizeof(fileCommands[0]));
     if (command != NULL)
     {
-        executeCommand(command);
+        writeToTmpFile(command);
     }
 }
 
@@ -41,7 +42,7 @@ void handleDir()
     char *command = getCommand(dirCommands, sizeof(dirCommands) / sizeof(dirCommands[0]));
     if (command != NULL)
     {
-        executeCommand(command);
+        writeToTmpFile(command);
     }
 }
 
@@ -65,7 +66,7 @@ void handleAll()
     char *command = getCommand(allCommands, totalSize);
     if (command != NULL)
     {
-        executeCommand(command);
+        writeToTmpFile(command);
     }
 }
 

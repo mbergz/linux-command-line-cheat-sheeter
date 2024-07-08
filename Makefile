@@ -5,7 +5,8 @@ LDFLAGS = -lreadline
 
 SRCS=$(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
-TARGET = cs
+TARGET = linux_cmd_cheat_sheeter
+INSTALL_DIR := $(HOME)/.local/bin
 
 # Compile source files to object files
 %.o: %.c
@@ -20,4 +21,4 @@ clean:
 	rm -f $(OBJS) $(TARGET)
 
 install:
-	cp $(TARGET) /usr/local/bin
+	@./install.sh

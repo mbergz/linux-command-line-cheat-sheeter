@@ -166,7 +166,7 @@ void executeCommand(char *line)
         {
             printf("\n");
         }
-        system(temp);
+        // system(temp);
     }
 }
 

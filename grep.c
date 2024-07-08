@@ -8,6 +8,7 @@
 #include <signal.h>
 #include "grep.h"
 #include "common.h"
+#include "filewriter.h"
 
 #define MAX_OPTIONS 1
 
@@ -46,11 +47,11 @@ void grepCheatSheet()
             strcat(modified, command + 4); // Move pointer 4 steps
             free(command);
 
-            executeCommand(modified);
+            writeToTmpFile(modified);
         }
         else
         {
-            executeCommand(command);
+            writeToTmpFile(command);
         }
     }
 }

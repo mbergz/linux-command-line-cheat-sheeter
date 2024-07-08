@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "common.h"
+#include "filewriter.h"
 
 static CommandInfo sedCommands[] = {
     {"sed 's/unix/linux/' file.txt", "Replace the FIRST word occurence of unix with linux in file.txt", {11, 17, 28}},
@@ -12,6 +13,6 @@ void sedCheatSheet()
     char *command = getCommand(sedCommands, sizeof(sedCommands) / sizeof(sedCommands[0]));
     if (command != NULL)
     {
-        executeCommand(command);
+        writeToTmpFile(command);
     }
 }
