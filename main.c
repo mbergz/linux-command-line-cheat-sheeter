@@ -5,6 +5,7 @@
 #include "grep.h"
 #include "sed.h"
 #include "common.h"
+#include "filewriter.h"
 
 void printHelp()
 {
@@ -15,6 +16,7 @@ void printHelp()
 
 int main(int argc, char *argv[])
 {
+    writeToTmpFile("");
     storeCurrentTerminalMode();
     signal(SIGINT, handleSigint);
 
