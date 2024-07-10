@@ -1,3 +1,5 @@
+set -e
+
 tmp_cs_file="/tmp/cs_command_output.txt"
 
 # Run executable with forwarded flags which will write to tmp_cs_file
