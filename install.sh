@@ -14,8 +14,8 @@ cp $target_script $install_dir
 
 alias="alias cs='source run_linux_cmd_cheat_sheeter.sh'"
 
-if [ -n "$ZSH_VERSION" ]; then
-    echo "Detected zsh"
+if [ -f "$HOME/.zshrc" ]; then
+    echo "zshrc found"
     if ! grep -Fxq "$alias" ~/.zshrc; then
         echo "Not in zshrc. Adding"
         echo "$alias" >> ~/.zshrc
@@ -24,8 +24,8 @@ if [ -n "$ZSH_VERSION" ]; then
         echo "Alias already exists in ~/.zshrc"
         echo "Installation successful"
     fi
-elif [ -n "$BASH_VERSION" ]; then
-    echo "Detected bash"
+elif [ -f "$HOME/.bashrc" ]; then
+    echo "bashrc found"
     if ! grep -Fxq "$alias" ~/.bashrc; then
         echo "Not in bashrc. Adding"
         echo "$alias" >> ~/.bashrc
