@@ -1,9 +1,11 @@
-set -e
-
 tmp_cs_file="/tmp/cs_command_output.txt"
 
 # Run executable with forwarded flags which will write to tmp_cs_file
 linux_cmd_cheat_sheeter "$@"
+
+if [ $? -ne 0 ]; then
+   return
+fi
 
 function append_to_history() {
    if [ -n "$ZSH_VERSION" ]; then
