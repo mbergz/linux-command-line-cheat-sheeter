@@ -3,14 +3,17 @@ CC = gcc
 CFLAGS  = -g -Wall
 LDFLAGS = -lreadline
 
-SRCS=$(wildcard *.c)
-OBJS = $(SRCS:.c=.o)
+SRC_DIR := src
+OBJ_DIR := obj
+INCLUDE_DIR := ./include
+
+SRCS=$(wildcard $(SRC_DIR)/*.c)
+OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 TARGET = linux_cmd_cheat_sheeter
-INSTALL_DIR := $(HOME)/.local/bin
 
 # Compile source files to object files
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) -I$(INCLUDE_DIR) $(CFLAGS) -c -o $@ $<
 
 # Linking
 $(TARGET): $(OBJS)

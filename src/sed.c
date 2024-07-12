@@ -14,5 +14,6 @@ void sedCheatSheet()
     if (command != NULL)
     {
         writeToTmpFile(command);
+        free(command);
     }
 }

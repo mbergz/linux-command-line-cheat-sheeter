@@ -34,6 +34,7 @@ void handleFile()
     if (command != NULL)
     {
         writeToTmpFile(command);
+        free(command);
     }
 }
 
@@ -43,6 +44,7 @@ void handleDir()
     if (command != NULL)
     {
         writeToTmpFile(command);
+        free(command);
     }
 }
 
@@ -67,6 +69,7 @@ void handleAll()
     if (command != NULL)
     {
         writeToTmpFile(command);
+        free(command);
     }
 }
 

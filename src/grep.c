@@ -48,10 +48,12 @@ void grepCheatSheet()
             free(command);
 
             writeToTmpFile(modified);
+            free(modified);
         }
         else
         {
             writeToTmpFile(command);
+            free(command);
         }
     }
 }
