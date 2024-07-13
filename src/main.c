@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
             {
                 printHelp();
             }
-            if (strcmp(argument, "find") == 0)
+            else if (strcmp(argument, "find") == 0)
             {
                 findCheatSheet();
             }
