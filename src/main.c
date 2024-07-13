@@ -44,6 +44,10 @@ int main(int argc, char *argv[])
             {
                 sedCheatSheet();
             }
+            else
+            {
+                printf("Cannot recognize argument: %s\n", argument);
+            }
         }
     }
     else
