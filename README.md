@@ -22,6 +22,7 @@ make install
 
 ### History to current shell
 After running this executable, the constructed command should be executed (if present) and in order to get the executed command added to history, a couple of tricks were required.
+
 First of, the result of C executable will be written to a temporary file and not executed by C program itself. Then, this temporary file will be read by the run script (which is a wrapper to execute the script). This run script is sourced by the current shell which will execute the command and add it to current shell's history.
 
 #### Install steps
