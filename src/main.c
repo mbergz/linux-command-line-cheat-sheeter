@@ -40,33 +40,28 @@ int main(int argc, char *argv[])
         argument = argv[1];
         if (argument != NULL)
         {
+            // Clear the content of tmp file so script doesnt ask to execute old command
+            writeToTmpFile("");
+
             if (strcmp(argument, "-h") == 0 || strcmp(argument, "help") == 0)
             {
                 printHelp();
                 return 0;
             }
 
-            // Clear the content of tmp file so script doesnt ask to execute old command
-            writeToTmpFile("");
-
             storeCurrentTerminalMode();
             signal(SIGINT, handleSigint);
 
-            int match = 0;
             for (int i = 0; i < NBR_OF_COMMANDS; i++)
             {
                 if (strcmp(argument, commands[i].argument) == 0)
                 {
                     commands[i].runCheatSheeter();
-                    match = 1;
-                    break;
+                    return 0;
                 }
             }
-            if (match == 0)
-            {
-                printf("Cannot recognize argument: %s\n", argument);
-                return 1;
-            }
+            printf("Cannot recognize argument: %s\n", argument);
+            return 1;
         }
     }
     else
