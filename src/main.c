@@ -4,6 +4,7 @@
 #include "find.h"
 #include "grep.h"
 #include "sed.h"
+#include "ls.h"
 #include "common.h"
 #include "filewriter.h"
 
@@ -12,6 +13,7 @@ void printHelp()
     printf("find\n");
     printf("grep\n");
     printf("sed\n");
+    printf("ls\n");
 }
 
 int main(int argc, char *argv[])
@@ -43,6 +45,10 @@ int main(int argc, char *argv[])
             else if (strcmp(argument, "sed") == 0)
             {
                 sedCheatSheet();
+            }
+            else if (strcmp(argument, "ls") == 0)
+            {
+                lsCheatSheet();
             }
             else
             {
