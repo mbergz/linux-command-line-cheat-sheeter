@@ -8,6 +8,22 @@
 #include "common.h"
 #include "filewriter.h"
 
+#define NBR_OF_COMMANDS 4
+
+struct LinuxCommand
+{
+    const char *argument;
+    void (*runCheatSheeter)(void);
+};
+
+typedef struct LinuxCommand LinuxCommand;
+
+LinuxCommand commands[NBR_OF_COMMANDS] = {
+    {"find", &findCheatSheet},
+    {"grep", &grepCheatSheet},
+    {"sed", &sedCheatSheet},
+    {"ls", &lsCheatSheet}};
+
 void printHelp()
 {
     printf("find\n");
@@ -18,12 +34,6 @@ void printHelp()
 
 int main(int argc, char *argv[])
 {
-    // Clear the content of tmp file so script doesnt ask to execute old command
-    writeToTmpFile("");
-
-    storeCurrentTerminalMode();
-    signal(SIGINT, handleSigint);
-
     char *argument;
     if (argc > 1)
     {
@@ -33,26 +43,29 @@ int main(int argc, char *argv[])
             if (strcmp(argument, "-h") == 0 || strcmp(argument, "help") == 0)
             {
                 printHelp();
+                return 0;
             }
-            else if (strcmp(argument, "find") == 0)
+
+            // Clear the content of tmp file so script doesnt ask to execute old command
+            writeToTmpFile("");
+
+            storeCurrentTerminalMode();
+            signal(SIGINT, handleSigint);
+
+            int match = 0;
+            for (int i = 0; i < NBR_OF_COMMANDS; i++)
             {
-                findCheatSheet();
+                if (strcmp(argument, commands[i].argument) == 0)
+                {
+                    commands[i].runCheatSheeter();
+                    match = 1;
+                    break;
+                }
             }
-            else if (strcmp(argument, "grep") == 0)
-            {
-                grepCheatSheet();
-            }
-            else if (strcmp(argument, "sed") == 0)
-            {
-                sedCheatSheet();
-            }
-            else if (strcmp(argument, "ls") == 0)
-            {
-                lsCheatSheet();
-            }
-            else
+            if (match == 0)
             {
                 printf("Cannot recognize argument: %s\n", argument);
+                return 1;
             }
         }
     }
