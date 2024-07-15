@@ -4,11 +4,12 @@
 #include "find.h"
 #include "grep.h"
 #include "sed.h"
+#include "top.h"
 #include "ls.h"
 #include "common.h"
 #include "filewriter.h"
 
-#define NBR_OF_COMMANDS 4
+#define NBR_OF_COMMANDS 5
 
 struct LinuxCommand
 {
@@ -22,7 +23,8 @@ LinuxCommand commands[NBR_OF_COMMANDS] = {
     {"find", &findCheatSheet},
     {"grep", &grepCheatSheet},
     {"sed", &sedCheatSheet},
-    {"ls", &lsCheatSheet}};
+    {"ls", &lsCheatSheet},
+    {"top", &topCheatSheet}};
 
 void printHelp()
 {
@@ -30,6 +32,7 @@ void printHelp()
     printf("grep\n");
     printf("sed\n");
     printf("ls\n");
+    printf("top\n");
 }
 
 int main(int argc, char *argv[])
