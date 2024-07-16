@@ -54,3 +54,5 @@ dkms.conf
 obj/
 
 .vscode/*
+
+linux_cmd_cheat_sheeter
