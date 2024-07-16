@@ -22,7 +22,7 @@ if [ -s $tmp_cs_file ]; then
    file_command=$(<"$tmp_cs_file")
    echo "$file_command"
 
-   echo -e "\033[31mExecute? [y or enter]\033[0m\n"
+   echo -e "\033[31mExecute? [y or enter]\033[0m"
    read userInput
    if [[ -z "$userInput" || "$userInput" == "y" || "$userInput" == "Y" ]]; then
       eval $file_command
