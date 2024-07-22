@@ -9,6 +9,7 @@
 #include "common.h"
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <sys/ioctl.h>
 
 #define STD_OUT_REVERSE "\x1b[7m"
 #define STD_OUT_RESET "\x1b[0m"
@@ -55,17 +56,48 @@ void enableNonCanonicalMode()
     tcsetattr(0, TCSANOW, &new);
 }
 
+static void printWithoutLineWrap(char *command, int isSelected)
+{
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+    // printf ("lines %d\n", w.ws_row);
+    // printf ("columns %d\n", w.ws_col);
+
+    size_t length = strlen(command);
+    size_t maxWidth = w.ws_col;
+    if (isSelected == 1)
+    {
+        maxWidth = maxWidth + 7; // Handle the selected command "> " + bold modifiers taking space in arr
+    }
+
+    if (length > maxWidth - 1)
+    {
+        command[maxWidth - 4] = '.';
+        command[maxWidth - 3] = '.';
+        command[maxWidth - 2] = '.';
+        command[maxWidth - 1] = '\n';
+        command[maxWidth] = '\0';
+    }
+
+    printf("%s", command);
+}
+
 static void printCommands(CommandInfo *commands, int size, int selectedCommand)
 {
     for (int i = 0; i < size; i++)
     {
+        char buffer[1024];
+        printf(CLEAR_LINE);
         if (i == selectedCommand)
         {
-            printf("> \e[1m%-50s\e[m %s\n", commands[i].command, commands[i].description);
+            snprintf(buffer, sizeof(buffer), "> \e[1m%-48s\e[m %s\n", commands[i].command, commands[i].description);
+            printWithoutLineWrap(buffer, true);
         }
         else
         {
-            printf("%-50s %s\n", commands[i].command, commands[i].description);
+            snprintf(buffer, sizeof(buffer), "%-50s %s\n", commands[i].command, commands[i].description);
+            printWithoutLineWrap(buffer, false);
         }
     }
 }
