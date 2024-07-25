@@ -21,6 +21,9 @@
 #define ANSI_COLOR_DARK_YELLOW "\033[33m"
 #define ANSI_COLOR_RESET "\033[0m"
 
+#define DEFAULT_PADDING 50
+#define MAX_PADDING 100
+
 static struct termios old;
 
 static int readlineActive = 0;
@@ -83,22 +86,79 @@ static void printWithoutLineWrap(char *command, int isSelected)
     printf("%s", command);
 }
 
-static void printCommands(CommandInfo *commands, int size, int selectedCommand)
+static int calculatePadding(CommandInfo *commands, int size)
 {
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+    int longest = 0;
     for (int i = 0; i < size; i++)
     {
+        size_t length = strlen(commands[i].command);
+        if (length >= longest)
+        {
+            longest = length;
+        }
+    }
+
+    int threshold = (int)(w.ws_col * 65 / 100); // 65% of terminal width
+
+    if (longest < (threshold - 10))
+    {
+        threshold = longest + 10;
+    }
+
+    return threshold;
+}
+
+static char *adjustCommandForPrint(const char *command)
+{
+    size_t len = strlen(command);
+    char *modified = (char *)malloc(len + 1);
+    if (modified == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    strcpy(modified, command);
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+    int threshold = (int)(w.ws_col * 65 / 100); // 65% of terminal width
+    if (len >= threshold)
+    {
+        int cutOffIndex = threshold;
+
+        modified[cutOffIndex - 3] = '.';
+        modified[cutOffIndex - 2] = '.';
+        modified[cutOffIndex - 1] = '.';
+        modified[cutOffIndex] = '\0';
+    }
+
+    return modified;
+}
+
+static void printCommands(CommandInfo *commands, int size, int selectedCommand)
+{
+    int padding = calculatePadding(commands, size);
+
+    for (int i = 0; i < size; i++)
+    {
+        char *modifiedCommand = adjustCommandForPrint(commands[i].command);
         char buffer[1024];
         printf(CLEAR_LINE);
         if (i == selectedCommand)
         {
-            snprintf(buffer, sizeof(buffer), "> \e[1m%-48s\e[m %s\n", commands[i].command, commands[i].description);
+            snprintf(buffer, sizeof(buffer), "> \e[1m%-*s\e[m %s\n", padding - 2, modifiedCommand, commands[i].description);
             printWithoutLineWrap(buffer, true);
         }
         else
         {
-            snprintf(buffer, sizeof(buffer), "%-50s %s\n", commands[i].command, commands[i].description);
+            snprintf(buffer, sizeof(buffer), "%-*s %s\n", padding, modifiedCommand, commands[i].description);
             printWithoutLineWrap(buffer, false);
         }
+        free(modifiedCommand);
     }
 }
 

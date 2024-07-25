@@ -6,10 +6,11 @@
 #include "sed.h"
 #include "top.h"
 #include "ls.h"
+#include "curl.h"
 #include "common.h"
 #include "filewriter.h"
 
-#define NBR_OF_COMMANDS 5
+#define NBR_OF_COMMANDS 6
 
 struct LinuxCommand
 {
@@ -24,7 +25,8 @@ LinuxCommand commands[NBR_OF_COMMANDS] = {
     {"grep", &grepCheatSheet},
     {"sed", &sedCheatSheet},
     {"ls", &lsCheatSheet},
-    {"top", &topCheatSheet}};
+    {"top", &topCheatSheet},
+    {"curl", &curlCheatSheet}};
 
 void printHelp()
 {
@@ -33,6 +35,7 @@ void printHelp()
     printf("sed\n");
     printf("ls\n");
     printf("top\n");
+    printf("curl\n");
 }
 
 int main(int argc, char *argv[])
