@@ -40,15 +40,15 @@ void printHelp()
 
 int main(int argc, char *argv[])
 {
+    // Clear the content of tmp file so script doesnt ask to execute old command
+    writeToTmpFile("");
+
     char *argument;
     if (argc > 1)
     {
         argument = argv[1];
         if (argument != NULL)
         {
-            // Clear the content of tmp file so script doesnt ask to execute old command
-            writeToTmpFile("");
-
             if (strcmp(argument, "-h") == 0 || strcmp(argument, "help") == 0)
             {
                 printHelp();
