@@ -7,10 +7,11 @@
 #include "top.h"
 #include "ls.h"
 #include "curl.h"
+#include "openssl.h"
 #include "common.h"
 #include "filewriter.h"
 
-#define NBR_OF_COMMANDS 6
+#define NBR_OF_COMMANDS 7
 
 struct LinuxCommand
 {
@@ -26,7 +27,9 @@ LinuxCommand commands[NBR_OF_COMMANDS] = {
     {"sed", &sedCheatSheet},
     {"ls", &lsCheatSheet},
     {"top", &topCheatSheet},
-    {"curl", &curlCheatSheet}};
+    {"curl", &curlCheatSheet},
+    {"openssl", &opensslCheatSheet},
+};
 
 void printHelp()
 {
@@ -36,6 +39,7 @@ void printHelp()
     printf("ls\n");
     printf("top\n");
     printf("curl\n");
+    printf("openssl\n");
 }
 
 int main(int argc, char *argv[])
