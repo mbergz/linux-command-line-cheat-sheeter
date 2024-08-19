@@ -201,9 +201,10 @@ char *getCommand(CommandInfo *commands, int size)
     printf(HIDE_CURSOR);
     int selectedLine = 0;
     char input[4];
+
+    printCommands(commands, size, selectedLine);
     while (1)
     {
-        printCommands(commands, size, selectedLine);
         memset(input, 0, sizeof(input));
 
         if (read(STDIN_FILENO, input, sizeof(input)) == -1)
@@ -225,7 +226,6 @@ char *getCommand(CommandInfo *commands, int size)
             resetTerminalMode();
             return NULL;
         }
-        printf("\033[%dA", size); // move cursor up x lines
         if (input[0] == '\t')
         {
             selectedLine = (selectedLine + 1) % size;
@@ -242,7 +242,21 @@ char *getCommand(CommandInfo *commands, int size)
                 // Up or shift+tab key pressed
                 selectedLine = (selectedLine - 1 + size) % size;
             }
+            else if (input[2] == 'C')
+            {
+                // Right key pressed
+                printf("\033[%dA", size);
+                printCommandsStepRight(commands, size, selectedLine);
+            }
+            else if (input[2] == 'D')
+            {
+                // Left key pressed
+                printf("\033[%dA", size);
+                printCommandsStepLeft(commands, size, selectedLine);
+            }
         }
+        printf("\033[%dA", size);
+        printCommands(commands, size, selectedLine);
     }
     printf(SHOW_CURSOR);
     // Now erase all lines
