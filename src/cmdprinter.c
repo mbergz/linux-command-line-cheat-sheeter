@@ -11,7 +11,22 @@
 
 #define CLEAR_LINE "\r\033[2K"
 
+#define ELLIPSIS "..."
+#define ELLIPSIS_WITH_NEWLINE "...\n"
+
 static int horizontalOffset = 0;
+
+static void applyEllipsisEndOfStringWithNewline(char *str, int threshold)
+{
+    memcpy(str + threshold - 4, ELLIPSIS_WITH_NEWLINE, 4);
+    str[threshold] = '\0';
+}
+
+static void applyEllipsisEndOfString(char *str, int threshold)
+{
+    memcpy(str + threshold - 3, ELLIPSIS, 3);
+    str[threshold] = '\0';
+}
 
 static void printWithoutLineWrap(char *command, int isSelected)
 {
@@ -27,11 +42,7 @@ static void printWithoutLineWrap(char *command, int isSelected)
 
     if (length > maxWidth - 1)
     {
-        command[maxWidth - 4] = '.';
-        command[maxWidth - 3] = '.';
-        command[maxWidth - 2] = '.';
-        command[maxWidth - 1] = '\n';
-        command[maxWidth] = '\0';
+        applyEllipsisEndOfStringWithNewline(command, maxWidth);
     }
 
     printf("%s", command);
@@ -62,6 +73,20 @@ static int calculatePadding(CommandInfo *commands, int size)
     return threshold;
 }
 
+static int calculateOffset(size_t len, int threshold)
+{
+    int offset;
+    if (len - horizontalOffset >= threshold)
+    {
+        offset = horizontalOffset;
+    }
+    else
+    {
+        offset = len - threshold;
+    }
+    return offset;
+}
+
 static char *adjustCommandForPrint(const char *command, int adjustment)
 {
     size_t len = strlen(command);
@@ -80,15 +105,7 @@ static char *adjustCommandForPrint(const char *command, int adjustment)
     int threshold = (int)(w.ws_col * 65 / 100); // 65% of terminal width
     if (len >= threshold)
     {
-        int offset;
-        if (len - horizontalOffset >= threshold)
-        {
-            offset = horizontalOffset;
-        }
-        else
-        {
-            offset = len - threshold;
-        }
+        int offset = calculateOffset(len, threshold);
 
         char *shifted = (char *)malloc(len + 1);
         if (shifted == NULL)
@@ -103,12 +120,7 @@ static char *adjustCommandForPrint(const char *command, int adjustment)
 
         if (strlen(shifted) > threshold)
         {
-            int cutOffIndex = threshold;
-
-            shifted[cutOffIndex - 3] = '.';
-            shifted[cutOffIndex - 2] = '.';
-            shifted[cutOffIndex - 1] = '.';
-            shifted[cutOffIndex] = '\0';
+            applyEllipsisEndOfString(shifted, threshold);
         }
 
         return shifted;
@@ -128,6 +140,7 @@ static char *adjustDescriptionForPrint(const char *description, int adjustment)
     }
 
     strcpy(modified, description);
+
     return modified;
 }
 
