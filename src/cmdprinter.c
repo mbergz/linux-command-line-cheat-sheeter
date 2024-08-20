@@ -12,15 +12,8 @@
 #define CLEAR_LINE "\r\033[2K"
 
 #define ELLIPSIS "..."
-#define ELLIPSIS_WITH_NEWLINE "...\n"
 
 static int horizontalOffset = 0;
-
-static void applyEllipsisEndOfStringWithNewline(char *str, int threshold)
-{
-    memcpy(str + threshold - 4, ELLIPSIS_WITH_NEWLINE, 4);
-    str[threshold] = '\0';
-}
 
 static void applyEllipsisEndOfString(char *str, int threshold)
 {
@@ -28,24 +21,13 @@ static void applyEllipsisEndOfString(char *str, int threshold)
     str[threshold] = '\0';
 }
 
-static void printWithoutLineWrap(char *command, int isSelected)
+static int calculateThresholdPercentage(int padding)
 {
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
-    size_t length = strlen(command);
-    size_t maxWidth = w.ws_col;
-    if (isSelected == 1)
-    {
-        maxWidth = maxWidth + 7; // Handle the selected command "> " + bold modifiers taking space in arr
-    }
-
-    if (length > maxWidth - 1)
-    {
-        applyEllipsisEndOfStringWithNewline(command, maxWidth);
-    }
-
-    printf("%s", command);
+    int percentage = (padding * 100) / w.ws_col + 2;
+    return percentage;
 }
 
 static int calculatePadding(CommandInfo *commands, int size)
@@ -129,7 +111,7 @@ static char *adjustCommandForPrint(const char *command, int adjustment)
     return modified;
 }
 
-static char *adjustDescriptionForPrint(const char *description, int adjustment)
+static char *adjustDescriptionForPrint(const char *description, int adjustment, int thresholdPercentage)
 {
     size_t len = strlen(description);
     char *modified = (char *)malloc(len + 1);
@@ -140,6 +122,34 @@ static char *adjustDescriptionForPrint(const char *description, int adjustment)
     }
 
     strcpy(modified, description);
+
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+    int width = 100 - thresholdPercentage;
+    int threshold = (int)(w.ws_col * width / 100);
+    if (len >= threshold)
+    {
+        int offset = calculateOffset(len, threshold);
+
+        char *shifted = (char *)malloc(len + 1);
+        if (shifted == NULL)
+        {
+            fprintf(stderr, "Memory allocation failed\n");
+            free(modified);
+            exit(EXIT_FAILURE);
+        }
+
+        strcpy(shifted, modified + offset);
+        free(modified);
+
+        if (strlen(shifted) > threshold)
+        {
+            applyEllipsisEndOfString(shifted, threshold);
+        }
+
+        return shifted;
+    }
 
     return modified;
 }
@@ -164,23 +174,24 @@ static void incrementAdjustment(int adjustment)
 static void printCommandsInternal(CommandInfo *commands, int size, int selectedCommand, int adjustment)
 {
     int padding = calculatePadding(commands, size);
+    int thresholdPercentage = calculateThresholdPercentage(padding);
     incrementAdjustment(adjustment);
 
     for (int i = 0; i < size; i++)
     {
         char *modifiedCommand = adjustCommandForPrint(commands[i].command, adjustment);
-        char *modifiedDescription = adjustDescriptionForPrint(commands[i].description, adjustment);
+        char *modifiedDescription = adjustDescriptionForPrint(commands[i].description, adjustment, thresholdPercentage);
         char buffer[1024];
         printf(CLEAR_LINE);
         if (i == selectedCommand)
         {
             snprintf(buffer, sizeof(buffer), "> \e[1m%-*s\e[m %s\n", padding - 2, modifiedCommand, modifiedDescription);
-            printWithoutLineWrap(buffer, true);
+            printf("%s", buffer);
         }
         else
         {
             snprintf(buffer, sizeof(buffer), "%-*s %s\n", padding, modifiedCommand, modifiedDescription);
-            printWithoutLineWrap(buffer, false);
+            printf("%s", buffer);
         }
         free(modifiedCommand);
         free(modifiedDescription);
