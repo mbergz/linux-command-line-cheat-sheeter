@@ -58,7 +58,7 @@ static int calculatePadding(CommandInfo *commands, int size)
 static int calculateOffset(size_t len, int threshold)
 {
     int offset;
-    if (len - horizontalOffset >= threshold)
+    if (horizontalOffset < len && len - horizontalOffset >= threshold)
     {
         offset = horizontalOffset;
     }
