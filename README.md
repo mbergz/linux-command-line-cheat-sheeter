@@ -8,7 +8,7 @@ Then after selection, the command is editable on all caret positions where input
 
 ## Demo
 
-https://github.com/user-attachments/assets/c5cc6ca4-b0bd-4e71-b7b9-701749aff648
+https://github.com/user-attachments/assets/441a98f9-4f2a-47fa-a125-d8599be639d5
 
 
 ## Build
