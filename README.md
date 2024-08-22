@@ -6,6 +6,11 @@ Available samples of specific commands will be printed out and navigable by arro
 
 Then after selection, the command is editable on all caret positions where input can be changed, like any path, flags, or search terms.
 
+## Demo
+
+https://github.com/user-attachments/assets/c5cc6ca4-b0bd-4e71-b7b9-701749aff648
+
+
 ## Build
 See the Makefile for details.
 
