@@ -69,7 +69,7 @@ static int calculateOffset(size_t len, int threshold)
     return offset;
 }
 
-static char *adjustCommandForPrint(const char *command, int adjustment)
+static char *adjustCommandForPrint(const char *command)
 {
     size_t len = strlen(command);
     char *modified = (char *)malloc(len + 1);
@@ -111,7 +111,7 @@ static char *adjustCommandForPrint(const char *command, int adjustment)
     return modified;
 }
 
-static char *adjustDescriptionForPrint(const char *description, int adjustment, int thresholdPercentage)
+static char *adjustDescriptionForPrint(const char *description, int thresholdPercentage)
 {
     size_t len = strlen(description);
     char *modified = (char *)malloc(len + 1);
@@ -179,8 +179,8 @@ static void printCommandsInternal(CommandInfo *commands, int size, int selectedC
 
     for (int i = 0; i < size; i++)
     {
-        char *modifiedCommand = adjustCommandForPrint(commands[i].command, adjustment);
-        char *modifiedDescription = adjustDescriptionForPrint(commands[i].description, adjustment, thresholdPercentage);
+        char *modifiedCommand = adjustCommandForPrint(commands[i].command);
+        char *modifiedDescription = adjustDescriptionForPrint(commands[i].description, thresholdPercentage);
         char buffer[1024];
         printf(CLEAR_LINE);
         if (i == selectedCommand)
