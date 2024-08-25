@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "common.h"
 #include "filewriter.h"
+#include "malloc_manager.h"
 
 static CommandInfo sedCommands[] = {
     {"sed 's/unix/linux/' file.txt", "Replace the FIRST word occurence of unix with linux in file.txt", {11, 17, 28}},
@@ -15,6 +16,6 @@ void sedCheatSheet()
     if (command != NULL)
     {
         writeToTmpFile(command);
-        free(command);
+        freePointer(command);
     }
 }

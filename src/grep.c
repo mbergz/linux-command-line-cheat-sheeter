@@ -9,6 +9,7 @@
 #include "grep.h"
 #include "common.h"
 #include "filewriter.h"
+#include "malloc_manager.h"
 
 #define MAX_OPTIONS 1
 
@@ -37,23 +38,18 @@ void grepCheatSheet()
             // replace grep with grep --color=always
             const char *grepWithColor = "grep --color=always";
             size_t newLength = strlen(grepWithColor) + strlen(command) - 3;
-            char *modified = malloc(newLength);
-            if (modified == NULL)
-            {
-                perror("malloc");
-                return;
-            }
+            char *modified = safeMalloc(newLength);
             strcpy(modified, grepWithColor);
             strcat(modified, command + 4); // Move pointer 4 steps
-            free(command);
+            freePointer(command);
 
             writeToTmpFile(modified);
-            free(modified);
+            freePointer(modified);
         }
         else
         {
             writeToTmpFile(command);
-            free(command);
+            freePointer(command);
         }
     }
 }

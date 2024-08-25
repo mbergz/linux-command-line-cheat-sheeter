@@ -7,7 +7,8 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 #include "common.h"
-#include "cmdprinter.h"
+#include "cmd_printer.h"
+#include "malloc_manager.h"
 
 #define CLEAR_LINE "\r\033[2K"
 
@@ -72,12 +73,8 @@ static int calculateOffset(size_t len, int threshold)
 static char *adjustCommandForPrint(const char *command)
 {
     size_t len = strlen(command);
-    char *modified = (char *)malloc(len + 1);
-    if (modified == NULL)
-    {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
+
+    char *modified = safeMalloc(len + 1);
 
     strcpy(modified, command);
 
@@ -89,16 +86,10 @@ static char *adjustCommandForPrint(const char *command)
     {
         int offset = calculateOffset(len, threshold);
 
-        char *shifted = (char *)malloc(len + 1);
-        if (shifted == NULL)
-        {
-            fprintf(stderr, "Memory allocation failed\n");
-            free(modified);
-            exit(EXIT_FAILURE);
-        }
+        char *shifted = safeMalloc(len + 1);
 
         strcpy(shifted, modified + offset);
-        free(modified);
+        freePointer(modified);
 
         if (strlen(shifted) > threshold)
         {
@@ -114,12 +105,7 @@ static char *adjustCommandForPrint(const char *command)
 static char *adjustDescriptionForPrint(const char *description, int thresholdPercentage)
 {
     size_t len = strlen(description);
-    char *modified = (char *)malloc(len + 1);
-    if (modified == NULL)
-    {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
+    char *modified = safeMalloc(len + 1);
 
     strcpy(modified, description);
 
@@ -132,16 +118,9 @@ static char *adjustDescriptionForPrint(const char *description, int thresholdPer
     {
         int offset = calculateOffset(len, threshold);
 
-        char *shifted = (char *)malloc(len + 1);
-        if (shifted == NULL)
-        {
-            fprintf(stderr, "Memory allocation failed\n");
-            free(modified);
-            exit(EXIT_FAILURE);
-        }
-
+        char *shifted = safeMalloc(len + 1);
         strcpy(shifted, modified + offset);
-        free(modified);
+        freePointer(modified);
 
         if (strlen(shifted) > threshold)
         {
@@ -193,8 +172,8 @@ static void printCommandsInternal(CommandInfo *commands, int size, int selectedC
             snprintf(buffer, sizeof(buffer), "%-*s %s\n", padding, modifiedCommand, modifiedDescription);
             printf("%s", buffer);
         }
-        free(modifiedCommand);
-        free(modifiedDescription);
+        freePointer(modifiedCommand);
+        freePointer(modifiedDescription);
     }
 }
 

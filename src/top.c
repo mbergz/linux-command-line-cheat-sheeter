@@ -2,12 +2,13 @@
 #include "common.h"
 #include "top.h"
 #include "filewriter.h"
+#include "malloc_manager.h"
 
 static CommandInfo topCommands[] = {
     {"top -o %MEM", "Sort processes by memory usage", {}},
     {"top -o TIME+", "Sort processes by longest total cpu time", {}},
     {"top -o PID", "Sort processes by PID in ascending order", {}},
-    {"top -u root", "Show all process by specific user", {11}}};
+    {"top -u root", "Show all processes by specific user", {11}}};
 
 void topCheatSheet()
 {
@@ -15,6 +16,6 @@ void topCheatSheet()
     if (command != NULL)
     {
         writeToTmpFile(command);
-        free(command);
+        freePointer(command);
     }
 }

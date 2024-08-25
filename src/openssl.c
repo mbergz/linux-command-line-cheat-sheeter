@@ -2,6 +2,7 @@
 #include "common.h"
 #include "openssl.h"
 #include "filewriter.h"
+#include "malloc_manager.h"
 
 static CommandInfo opensslCommands[] = {
     {"openssl x509 -in mycert.pem -text -noout", "View x509 certificate", {28}},
@@ -18,6 +19,6 @@ void opensslCheatSheet()
     if (command != NULL)
     {
         writeToTmpFile(command);
-        free(command);
+        freePointer(command);
     }
 }

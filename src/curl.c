@@ -2,6 +2,7 @@
 #include "common.h"
 #include "curl.h"
 #include "filewriter.h"
+#include "malloc_manager.h"
 
 static CommandInfo curlCommands[] = {
     {"curl https://example.com", "Basic GET request", {24}},
@@ -19,6 +20,6 @@ void curlCheatSheet()
     if (command != NULL)
     {
         writeToTmpFile(command);
-        free(command);
+        freePointer(command);
     }
 }

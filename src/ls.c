@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "common.h"
 #include "filewriter.h"
+#include "malloc_manager.h"
 
 static CommandInfo lsCommands[] = {
     {"ls -a", "List files and dir including hidden (\"ll -a\")", {}},
@@ -19,6 +20,6 @@ void lsCheatSheet()
     if (command != NULL)
     {
         writeToTmpFile(command);
-        free(command);
+        freePointer(command);
     }
 }

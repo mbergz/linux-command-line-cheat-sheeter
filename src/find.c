@@ -8,6 +8,7 @@
 #include "find.h"
 #include "common.h"
 #include "filewriter.h"
+#include "malloc_manager.h"
 
 #define MAX_OPTIONS 3
 
@@ -34,7 +35,7 @@ void handleFile()
     if (command != NULL)
     {
         writeToTmpFile(command);
-        free(command);
+        freePointer(command);
     }
 }
 
@@ -44,7 +45,7 @@ void handleDir()
     if (command != NULL)
     {
         writeToTmpFile(command);
-        free(command);
+        freePointer(command);
     }
 }
 
@@ -69,7 +70,7 @@ void handleAll()
     if (command != NULL)
     {
         writeToTmpFile(command);
-        free(command);
+        freePointer(command);
     }
 }
 

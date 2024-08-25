@@ -7,7 +7,8 @@
 #include <termios.h>
 #include <signal.h>
 #include "common.h"
-#include "cmdprinter.h"
+#include "cmd_printer.h"
+#include "malloc_manager.h"
 #include <readline/readline.h>
 #include <readline/history.h>
 
@@ -69,7 +70,7 @@ static void lineHandler(char *line)
     else
     {
         readlineActive = 0;
-        free(line);
+        freePointer(line);
     }
 }
 
@@ -102,13 +103,7 @@ static int editLineAtIndex(int index, char **line, int *offset)
 
     readlineActive = 1;
 
-    char *lineCopy = malloc(100);
-    if (lineCopy == NULL)
-    {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-
+    char *lineCopy = safeMalloc(100);
     strcpy(lineCopy, *line);
 
     while (readlineActive)
@@ -132,7 +127,7 @@ static int editLineAtIndex(int index, char **line, int *offset)
     printf("%s", lineCopy);
 
     *offset += (strlen(lineCopy) - strlen(*line));
-    free(*line);
+    freePointer(*line);
     *line = lineCopy;
     return 0;
 }
@@ -142,7 +137,7 @@ void executeCommand(char *line)
     printf("%s\n", line);
     char temp[strlen(line) + 1];
     strcpy(temp, line);
-    free(line);
+    freePointer(line);
     printf("\033[31mExecute? [y or enter]\033[0m\n");
 
     char c;
@@ -161,12 +156,7 @@ void executeCommand(char *line)
 
 static char *editCommand(CommandInfo commandInfo)
 {
-    char *line = (char *)malloc(100 * sizeof(char));
-    if (line == NULL)
-    {
-        perror("malloc");
-        return NULL;
-    }
+    char *line = safeMalloc(100 * sizeof(char));
     strcpy(line, commandInfo.command);
     printf("%s", line);
     fflush(stdout);

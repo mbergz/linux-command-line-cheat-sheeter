@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <signal.h>
 #include "find.h"
@@ -10,6 +11,7 @@
 #include "openssl.h"
 #include "common.h"
 #include "filewriter.h"
+#include "malloc_manager.h"
 
 #define NBR_OF_COMMANDS 7
 
@@ -46,6 +48,7 @@ int main(int argc, char *argv[])
 {
     // Clear the content of tmp file so script doesnt ask to execute old command
     writeToTmpFile("");
+    atexit(cleanUpAllPointerMallocs);
 
     char *argument;
     if (argc > 1)
