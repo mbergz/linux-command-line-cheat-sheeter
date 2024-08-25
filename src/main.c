@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
 {
     // Clear the content of tmp file so script doesnt ask to execute old command
     writeToTmpFile("");
-    atexit(cleanUpAllPointerMallocs);
 
     char *argument;
     if (argc > 1)
@@ -64,6 +63,7 @@ int main(int argc, char *argv[])
 
             storeCurrentTerminalMode();
             signal(SIGINT, handleSigint);
+            atexit(cleanUpAllPointerMallocs);
 
             for (int i = 0; i < NBR_OF_COMMANDS; i++)
             {
