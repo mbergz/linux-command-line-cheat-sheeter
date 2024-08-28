@@ -15,6 +15,7 @@
 
 static CommandInfo grepCommands[] = {
     {"grep boo file.txt", "Search the file.txt for a line matching boo", {8, 17}},
+    {"grep -Rnw '/path/' -e 'pattern'", "Search in path for all files matching pattern. Matching whole words with -w.", {17, 30}},
     {"grep -i \"word\" file.txt", "Search the file.txt for a line matching case insensitive word", {14, 23}},
     {"grep -c \"word\" file.txt", "Find number of lines that match word in file.txt", {14, 23}},
     {"grep -n \"word\" file.txt", "Show line numberof liines that match word in file.txt", {14, 23}},
