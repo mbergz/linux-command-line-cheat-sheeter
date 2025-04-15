@@ -39,6 +39,9 @@ void *safeMalloc(size_t size)
             cleanUpAllPointerMallocs();
             exit(EXIT_FAILURE);
         }
+
+        allocatedPointers[numPointers++] = ptr;
+
         return ptr;
     }
     else

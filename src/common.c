@@ -22,8 +22,7 @@
 #define ANSI_COLOR_DARK_YELLOW "\033[33m"
 #define ANSI_COLOR_RESET "\033[0m"
 
-#define DEFAULT_PADDING 50
-#define MAX_PADDING 100
+#define MAX_COMMAND_LENGTH 150
 
 static struct termios old;
 
@@ -103,7 +102,7 @@ static int editLineAtIndex(int index, char **line, int *offset)
 
     readlineActive = 1;
 
-    char *lineCopy = safeMalloc(100);
+    char *lineCopy = safeMalloc(MAX_COMMAND_LENGTH);
     strcpy(lineCopy, *line);
 
     while (readlineActive)
@@ -156,7 +155,7 @@ void executeCommand(char *line)
 
 static char *editCommand(CommandInfo commandInfo)
 {
-    char *line = safeMalloc(100 * sizeof(char));
+    char *line = safeMalloc(MAX_COMMAND_LENGTH * sizeof(char));
     strcpy(line, commandInfo.command);
     printf("%s", line);
     fflush(stdout);
