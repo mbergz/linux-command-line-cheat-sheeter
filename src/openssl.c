@@ -11,9 +11,9 @@ static CommandInfo opensslCommands[] = {
     {"openssl s_client -showcerts -connect google.com:443 2>&1 < /dev/null | openssl x509 > cert.pem", "Download x509 certificate from website", {47, 94}},
     {"openssl s_client -showcerts -connect test.com:443 2>&1 < /dev/null | sed -n '/-----BEGIN/,/-----END/p' > chain.pem", "Download chain of x509 cert from website", {46, 114}},
     {"openssl req -in file.csr -text -noout", "View CSR", {24}},
-    {"openssl genrsa -out my_private_key.key 2048", "Generate private key", {}},
-    {"openssl rsa -in my_private_key.key -pubout > my_public_key.pub", "Generate public key with private key", {}},
-    {"openssl req -x509 -new -key my_private_key.key -days 365 -out mycert.pem", "Generate self-signed certificate", {}},
+    {"openssl genrsa -out my_private_key.key 2048", "Generate private key", {34, 43}},
+    {"openssl rsa -in my_private_key.key -pubout > my_public_key.pub", "Generate public key with private key", {34, 62}},
+    {"openssl req -x509 -new -key my_private_key.key -days 365 -out mycert.pem", "Generate self-signed certificate", {46, 56, 72}},
 };
 
 void opensslCheatSheet()
